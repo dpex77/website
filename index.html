@@ -6,16 +6,18 @@
   <title>Welcome — My Website</title>
   <style>
     body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  min-height: 100vh;
-  margin: 0;
-  display: grid;
-  place-items: center;
-  background: url('cloud.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #0b1a2b;
-}
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center; /* horizontal center */
+      align-items: flex-start; /* stick to the top */
+      background: url('cloud.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #0b1a2b;
+    }
     .card {
+      margin-top: 2rem; /* some spacing from very top */
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(11,26,43,0.08);
@@ -32,9 +34,8 @@
 <body>
   <div class="card">
     <h1>Dipesh Parajuli</h1>
-    <p> I’m a cybersecurity engineer by profession and a poet at heart.</p>
-    <footer> </footer>
+    <p>I’m a cybersecurity engineer by profession and a poet at heart.</p>
+    <footer></footer>
   </div>
 </body>
 </html>
-
