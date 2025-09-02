@@ -8,188 +8,206 @@
     body {
       font-family: Arial, sans-serif;
       line-height: 1.6;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f9;
+      margin: 20px;
+      max-width: 900px;
+    }
+    h1, h2, h3, h4 {
       color: #333;
     }
-    header {
-      background: #1e3a8a;
-      color: #fff;
-      padding: 1.5rem;
-      text-align: center;
-    }
-    main {
-      max-width: 900px;
-      margin: auto;
-      padding: 2rem;
-      background: #fff;
-    }
-    h1, h2, h3 {
-      color: #1e3a8a;
-    }
-    pre {
+    code, pre {
       background: #f4f4f4;
-      padding: 1rem;
-      border-radius: 6px;
-      overflow-x: auto;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: block;
+      margin: 10px 0;
+      white-space: pre-wrap;
     }
     table {
-      border-collapse: collapse;
       width: 100%;
-      margin: 1rem 0;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
+      border-collapse: collapse;
+      margin: 20px 0;
     }
     th, td {
-      padding: 0.6rem;
+      border: 1px solid #ccc;
+      padding: 8px;
       text-align: left;
     }
     th {
-      background: #f0f0f0;
+      background: #eee;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Code Injection</h1>
-  </header>
 
-  <main>
-    <h2>1. Overview</h2>
-    <p>
-      Code injection would mean injecting the malicious code into the application so they get executed.
-      Code injection usually runs with the context of the application itself. So, code injection typically
-      compromises the application but may not directly affect the entire system. Code injection usually
-      targets the application’s runtime environment (e.g., Python, PHP, Java, JavaScript).
-    </p>
+<h1>Code Injection</h1>
 
-    <h2>2. Vulnerability from an Attacker Perspective</h2>
-    <p>
-      From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path
-      to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious
-      actions, such as:
-    </p>
-    <ul>
-      <li><b>Arbitrary Command Execution</b> – run system-level commands (<code>rm -rf /</code>, <code>cat /etc/passwd</code>).</li>
-      <li><b>File System Access</b> – read, modify, or delete sensitive files.</li>
-      <li><b>Persistence and Lateral Movement</b> – create backdoors, install malware, move across the network.</li>
-      <li><b>Privilege Escalation Opportunities</b> – if app runs as root/admin, exploit executes with same rights.</li>
-      <li><b>Stealthy Abuse</b> – silently harvest secrets or manipulate logic.</li>
-      <li><b>Exploitation of the Runtime Environment</b> – load arbitrary modules (<code>os</code>, <code>subprocess</code>, etc.).</li>
-      <li><b>Business and Operational Impact</b> – DoS, breaches, legal issues, trust loss.</li>
-    </ul>
+<h2>1. Overview:</h2>
+<p>Code injection would mean injecting the malicious code into the application so they get executed. Code injection usually runs with the context of the application itself. So, code injection typically compromises the application but may not directly affect the entire system. Code injection usually targets the application’s runtime environment (e.g., Python, PHP, Java, JavaScript).</p>
 
-    <p>
-      An attacker needs to know what type of code application is using and craft malicious code.
-      This is unlike command injection. The code injection exploits the language interpreter itself.
-    </p>
+<h2>2. Vulnerability from an Attacker Perspective</h2>
+<p>From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious actions, such as:</p>
+<ul>
+  <li><b>Arbitrary Command Execution</b> – The attacker can run system-level commands (<code>rm -rf /</code>, <code>cat /etc/passwd</code>, <code>netstat</code>, etc.).</li>
+  <li><b>File System Access</b> – Sensitive files such as <code>/etc/shadow</code>, database credentials, or API keys can be accessed and exfiltrated.</li>
+  <li><b>Persistence and Lateral Movement</b> – Attackers can create backdoors or install malicious packages.</li>
+  <li><b>Privilege Escalation Opportunities</b> – If the vulnerable application is running with elevated privileges.</li>
+  <li><b>Stealthy Abuse</b> – Harvest sensitive data or manipulate application logic silently.</li>
+  <li><b>Exploitation of the Runtime Environment</b> – Load arbitrary modules like <code>os</code>, <code>subprocess</code>, <code>socket</code>, <code>requests</code>.</li>
+  <li><b>Business and Operational Impact</b> – Service disruption, data breaches, and loss of trust.</li>
+</ul>
 
-    <h3>Attacker Discovery in Black-Box Testing</h3>
-    <ul>
-      <li><b>Error Messages</b> – verbose stack traces leak language info.</li>
-      <li><b>Behavioral Clues</b> – math-like evaluation hints <code>eval</code>.</li>
-      <li><b>Payload Probing</b> – test inputs like <code>1+1</code>, <code>"a"*5</code>, <code>__import__('os')</code>.</li>
-      <li><b>Common Frameworks</b> – known stacks imply likely runtimes.</li>
-    </ul>
+<p>An attacker needs to know what type of code application is using and craft malicious code. This is unlike command injection. The code injection exploits the language interpreter itself (Python in this case). It runs inside the application’s process, with the same privileges as the app and you can manipulate variables, import modules, access memory, etc.</p>
 
-    <p>Once identified, attackers craft payloads specific to that interpreter.</p>
+<p>Here you are not limited to system commands — you can access internal data, override functions, manipulate files, open network connections, etc.</p>
 
-    <h3>2.1 Attempts of an Attacker</h3>
-    <pre>
+<h3>Discovery Techniques:</h3>
+<ul>
+  <li><b>Error Messages</b> – Verbose messages reveal interpreter/language.</li>
+  <li><b>Behavioral Clues</b> – Input/output formatting can leak info.</li>
+  <li><b>Payload Probing</b> – Test inputs like <code>1+1</code>, <code>"a"*5</code>, <code>__import__('os')</code>.</li>
+  <li><b>Common Frameworks</b> – If stack is known, language is inferred.</li>
+</ul>
+
+<p>Once identified, the attacker crafts payloads specific to that interpreter. For example:</p>
+<pre>Python → __import__('os').system('id')
+PHP → system('id') or eval($_GET['cmd']);
+Java → Runtime.getRuntime().exec()</pre>
+
+<h2>2.1 Attempts of an attacker:</h2>
+<pre>
 user = input("Enter the first number: ")
 user1 = input("enter the second number: ")
+
 evaluated = eval(user) + eval(user1)
 print(evaluated)
-    </pre>
-    <p>
-      If attacker enters <code>__import__('os').system('rm -rf /')</code>,
-      this executes destructive system commands.
-    </p>
+</pre>
+<p><b>Example Output:</b></p>
+<pre>
+Enter the first number: 10
+enter the second number: 15
+25
+</pre>
 
-    <pre>
+<p><b>Malicious Payload Example:</b></p>
+<pre>
+Enter the first number: __import__('os').system('rm -rf /')
+enter the second number:
+</pre>
+
+<p>Another example:</p>
+<pre>
+Enter the first number: __import__('subprocess').getoutput('ls')
+enter the second number:
+</pre>
+
+<p>Another dangerous function is <code>exec</code>:</p>
+<pre>
+exec("for i in range(3): print(i)")
+# prints 0 1 2
+
 user_code = input("Enter Python code: ")
 exec(user_code)
-    </pre>
-    <p>
-      With <code>exec</code>, attacker could run:
-      <code>__import__('os').system('rm -rf /')</code>
-    </p>
+</pre>
 
-    <h2>3. Vulnerability from a Defender Perspective</h2>
-    <ul>
-      <li>Never trust user input.</li>
-      <li>Input validation &amp; sanitization (e.g., regex, whitelisting).</li>
-      <li>Avoid using dynamic code execution (eval, exec, Function).</li>
-      <li>Use contextual encoding (HTML, JS, SQL parameterization).</li>
-      <li>Apply least privilege; don’t run apps as root.</li>
-    </ul>
+<h2>3. Vulnerability from a defender perspective:</h2>
+<ul>
+  <li><b>Never trust user input</b></li>
+  <li><b>Input validation</b> – Enforce types and patterns.</li>
+  <li><b>Input Sanitization</b> – Strip unsafe characters.</li>
+  <li><b>Avoid dynamic code execution</b> – Don’t use <code>eval</code> or <code>exec</code>.</li>
+  <li><b>Use contextual encoding</b> – Ensure user input is treated as data.</li>
+</ul>
 
-    <h3>3.1 Solutions of a Defender</h3>
-    <h4>Avoid eval()</h4>
-    <pre>
+<h3>3.1 Solutions of a defender:</h3>
+<h4>Avoid eval()</h4>
+<p><b>Safe Alternative (math evaluation only):</b></p>
+<pre>
 import ast
+
 try:
     user = ast.literal_eval(input("Enter the first number: "))
     user1 = ast.literal_eval(input("Enter the second number: "))
     print(user + user1)
 except Exception:
     print("Invalid input!")
-    </pre>
+</pre>
 
-    <h4>Avoid exec()</h4>
-    <p>
-      There is no safe equivalent. If needed, use <b>sandboxing</b> like
-      RestrictedPython or isolated containers. Prefer task-specific libraries.
-    </p>
+<p><b>Other Safer Libraries:</b> decimal.Decimal, sympy, numexpr</p>
 
-    <h2>4. Extras: Difference from Command Injection</h2>
-    <p>
-      Command injection happens when user input is passed to system-level commands.
-    </p>
-    <pre>
+<h4>Avoid exec()</h4>
+<p>There’s no safe equivalent in the Python stdlib. Use sandboxing (RestrictedPython, containers, etc.).</p>
+
+<h2>4. Extras:</h2>
+<h3>Difference from Command Injection</h3>
+<pre>
 import os
 user_input = input("Enter filename: ")
 os.system(f"cat {user_input}")
-    </pre>
-    <p>
-      Attacker could type: <code>file.txt; rm -rf /</code>
-    </p>
+</pre>
 
-    <h3>Comparison Table</h3>
-    <table>
-      <tr>
-        <th>Factor</th>
-        <th>Command Injection</th>
-        <th>Code Injection</th>
-      </tr>
-      <tr>
-        <td>Target</td>
-        <td>OS commands</td>
-        <td>Application logic + sometimes OS</td>
-      </tr>
-      <tr>
-        <td>Access to app internals</td>
-        <td>None</td>
-        <td>Full access to variables, memory, functions</td>
-      </tr>
-      <tr>
-        <td>Potential impact</td>
-        <td>High (files, network)</td>
-        <td>Very High (app logic, secrets, system)</td>
-      </tr>
-      <tr>
-        <td>Exploit complexity</td>
-        <td>Easier</td>
-        <td>Harder (requires language knowledge)</td>
-      </tr>
-      <tr>
-        <td>Privileges dependency</td>
-        <td>OS-level privileges</td>
-        <td>App-level privileges (may escalate)</td>
-      </tr>
-    </table>
-  </main>
+<p>For example: <code>file.txt; rm -rf /</code></p>
+
+<h4>Comparison Table</h4>
+<table>
+  <tr>
+    <th>Factor</th>
+    <th>Command Injection</th>
+    <th>Code Injection</th>
+  </tr>
+  <tr>
+    <td>Target</td>
+    <td>OS commands</td>
+    <td>Application logic + sometimes OS</td>
+  </tr>
+  <tr>
+    <td>Access to app internals</td>
+    <td>None</td>
+    <td>Full access to variables, memory, functions</td>
+  </tr>
+  <tr>
+    <td>Potential impact</td>
+    <td>High (files, network)</td>
+    <td>Very High (app logic, secrets, system)</td>
+  </tr>
+  <tr>
+    <td>Exploit complexity</td>
+    <td>Usually easier</td>
+    <td>Can require knowledge of app structure</td>
+  </tr>
+  <tr>
+    <td>Privileges dependency</td>
+    <td>OS-level privileges</td>
+    <td>App-level privileges (may escalate)</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <th>Factor</th>
+    <th>Command Injection</th>
+    <th>Code Injection</th>
+  </tr>
+  <tr>
+    <td>Knowledge needed</td>
+    <td>Minimal — just find input that reaches shell</td>
+    <td>Moderate — need to know language &amp; context</td>
+  </tr>
+  <tr>
+    <td>Exploitation complexity</td>
+    <td>Usually easier</td>
+    <td>Usually harder</td>
+  </tr>
+  <tr>
+    <td>Impact</td>
+    <td>OS-level control, files, network</td>
+    <td>App logic + OS (if you can figure it out)</td>
+  </tr>
+  <tr>
+    <td>From IP only (no code access)</td>
+    <td>High</td>
+    <td>Medium/Low</td>
+  </tr>
+</table>
+
 </body>
 </html>
