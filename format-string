@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No Format String Vulnerability in Python</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 120px auto 40px;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    }
+    h1, h2, h3 {
+      color: #0b1a2b;
+    }
+    pre {
+      background: #f0f0f0;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: monospace;
+    }
+    ul {
+      margin: 0.5rem 0 1rem 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>No Format String Vulnerability in Python</h1>
+
+    <h2>1. Overview</h2>
+    <p>
+      In Python, strings can be formatted using <code>f-strings</code>, <code>.format()</code>, or <code>%</code> formatting.
+    </p>
+    <p>
+      <strong>F-strings</strong> allow inline expression evaluation and string interpolation.
+    </p>
+    <pre><code>name = "Dipesh"
+print(f"My name is {name}")</code></pre>
+    <p>
+      Python’s <code>print()</code> function <strong>does not interpret user input as a format string in an unsafe way</strong>.
+      Even with f-strings, Python evaluates expressions before printing—you cannot inject arbitrary format specifiers like in C.
+    </p>
+    <p>
+      Format string vulnerabilities occur in lower-level languages like C, where unsanitized user input is passed to functions like <code>printf()</code>.
+    </p>
+
+    <h2>2. Vulnerability from an attacker perspective</h2>
+    <h3>2.1 Attempts of an attacker (C example)</h3>
+    <pre><code>char user_input[100];          // Creates a string buffer
+scanf("%s", user_input);       // Reads user input
+printf(user_input);            // Prints directly (vulnerable)</code></pre>
+    <p>If an attacker enters <code>%x %x %x %x</code>, they can read memory and potentially execute arbitrary code.</p>
+    <p><strong>Python is safe</strong> because it does not interpret user input as format specifiers in print statements.</p>
+
+    <h2>3. Vulnerability from a defender perspective</h2>
+    <h3>3.1 Solutions for defenders (Python)</h3>
+    <ul>
+      <li>Treat user input as <strong>data</strong>, not code.</li>
+      <li>Use <code>f-strings</code>, <code>.format()</code>, or string concatenation safely:</li>
+    </ul>
+    <pre><code>user_input = input("Enter your name: ")
+print(f"Hello {user_input}")       # Safe
+print("Hello {}".format(user_input))  # Safe</code></pre>
+    <ul>
+      <li>Avoid <code>eval()</code> on untrusted input.</li>
+    </ul>
+
+    <h2>4. Extras</h2>
+    <ul>
+      <li>Python’s string formatting is inherently safe when used properly.</li>
+      <li>Format string vulnerabilities are mostly a concern in C/C++.</li>
+      <li>Always validate and sanitize input in web applications or when interacting with lower-level code.</li>
+      <li>Example of safe logging in Python:</li>
+    </ul>
+    <pre><code>import logging
+user_input = input("Enter data: ")
+logging.info("User input: %s", user_input)  # Safe</code></pre>
+
+  </div>
+</body>
+</html>
