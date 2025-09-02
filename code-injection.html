@@ -1,4 +1,26 @@
-Code Injection 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Injection</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+    margin: 20px;
+    background-color: #f9f9f9;
+    color: #111;
+    white-space: pre-wrap;
+}
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
 
 1. Overview: 
 
@@ -30,10 +52,12 @@ Business and Operational Impact
 Beyond technical compromise, this can result in: 
 
 Service disruption (DoS by deleting critical files). 
+
 Data breaches (regulatory/legal issues). 
+
 Loss of trust and reputation for the application provider. 
 
-An attacker needs to know what type of code application is using and craft malicious code. This is unlike command injection. The code injection exploits the language interpreter itself (Python in this case). It runs inside the application’s process, with the same privileges as the app and you can manipulate variables, import modules, access memory, etc. 
+An attacker needs to know what type of code application is using and craft malicious code. This is unlike command injection. The code injection exploits the language interpreter itself (Python in this case). It runs inside the application’s process, with the same privileges as the app and you can manipulate variables, import modules, access memory, etc.  
 
 Here you are not limited to system commands — you can access internal data, override functions, manipulate files, open network connections, etc. 
 
@@ -41,42 +65,53 @@ In black-box scenarios, attackers often don’t know upfront which programming l
 
 Attackers can discover this through: 
 
-Error Messages – verbose messages like NameError: name 'foobar' is not defined point to Python.
-Behavioral Clues – math evaluation hints at eval.
-Payload Probing – inputs like 1+1, "a"*5, __import__('os').
-Common Frameworks – Django, Flask → Python; Laravel → PHP.
+Error Messages – Many applications reveal the language or stack in verbose error messages (e.g., NameError: name 'foobar' is not defined points to Python). 
 
-Once identified, payloads are crafted specific to that interpreter: 
+Behavioral Clues – The way input is processed and output is formatted can give hints (e.g., evaluating mathematical expressions directly suggests eval usage). 
 
-Python: __import__('os').system('id')
-PHP: system('id') or eval($_GET['cmd']);
-Java: reflection or Runtime.getRuntime().exec(). 
+Payload Probing – Attackers try different payloads (1+1, "a"*5, __import__('os')) and observe the response to deduce the backend language. 
+
+Common Frameworks – If the app stack is known (Django, Flask, PHP Laravel, etc.), attackers know which languages are likely behind it. 
+
+Once identified, the attacker crafts payloads specific to that interpreter. For example: 
+
+In Python, they might inject __import__('os').system('id'). 
+
+In PHP, payloads like system('id') or eval($_GET['cmd']); equivalents are tried. 
+
+In Java, attackers might attempt to inject reflection calls or manipulate Runtime.getRuntime().exec(). 
 
 2.1. Attempts of an attacker: 
 
-A simplest example of code injection would be pythons eval function. Eval allows code injection. Eval() executes code, not just expressions. It's equivalent to letting someone type code directly into your program. 
+A simplest example of code injection would be pythons eval function. Eval allows code injection. Eval() executes code, not just expressions. It's equivalent to letting someone type code directly into your program.  
 
 user= input("Enter the first number: ") 
+
 user1= input("enter the second number: ") 
 
 evaluated= eval(user) + eval(user1) 
+
 print(evaluated) 
 
 Enter the first number: 10 
+
 enter the second number: 15 
+
 25 
 
-But if the attacker: 
+But if the attacker:  
 
 Enter the first number: __import__('os').system('rm -rf /') 
-enter the second number: 
+
+enter the second number:  
 
 This would execute a system command that deletes all files. 
 
 Another example: 
 
 Enter the first number: __import__('subprocess').getoutput('ls') 
-enter the second number: 
+
+enter the second number:  
 
 This lists files on the system. The attacker can read sensitive files (open('/etc/passwd').read()). Run network commands and Install malware. 
 
@@ -93,11 +128,13 @@ eval("2 + 3")   # returns 5
 exec(code) executes any block of Python code (statements, functions, imports, loops, etc.) and returns nothing. 
 
 exec("for i in range(3): print(i)") 
+
 # prints 0 1 2 
 
 Exec is more dangerous because it will run whatever code the user provides. 
 
 user_code = input("Enter Python code: ") 
+
 exec(user_code) 
 
 __import__('os').system('rm -rf /'): if an attacker types this, this might delete entire files. 
@@ -108,51 +145,70 @@ Never trust user input
 
 Input validation: Check that incoming data meets expected patterns or types TLV. Example: only allow integers for age, only allow letters for names. 
 
-Input Sanitization: Remove or neutralize unsafe characters or code before processing. Example: stripping or escaping <, >, ', " to prevent injection 
+Input Sanitization: Remove or neutralize unsafe characters or code before processing. 
+
+Example: stripping or escaping <, >, ', " to prevent injection 
 
 Avoid using dynamic code execution: Using functions like eval(), exec(), Function(), or similar that execute user input as code. 
 
 Use contextual encoding: Convert data into a safe format for the target context so it cannot be misinterpreted as code. Encoding ensures data is interpreted as data, not as code. 
 
 HTML encoding: Convert < → &lt;, > → &gt; to prevent XSS. 
+
 JavaScript encoding: Escape quotes, backslashes to safely include strings in JS. 
+
 SQL query parameterization: Avoid embedding user input directly in SQL queries; use placeholders (? or $1) to prevent SQL injection. 
+
 Base64 Encoding: Encodes binary or arbitrary text into ASCII-safe characters. Example: useful for sending binary data in JSON or URLs. 
+
 URL encoding: Converts unsafe characters in URLs ( → %20) to ensure proper transmission.  
 
-3.1 Solutions of a defender: 
+3.1 Solutions of a defender:  
 
 3.1 Avoid eval() 
 
-Why unsafe? eval() executes arbitrary expressions. If user input reaches eval(), attackers can run arbitrary Python code and take control of the application. 
+Why unsafe? 
+eval() executes arbitrary expressions. If user input reaches eval(), attackers can run arbitrary Python code and take control of the application. 
 
-Safe Alternative (math evaluation only) If your use case is limited to evaluating numbers or simple math expressions, use ast.literal_eval(), which only parses literals (numbers, strings, lists, dicts, etc.) safely: 
+Safe Alternative (math evaluation only) 
+If your use case is limited to evaluating numbers or simple math expressions, use ast.literal_eval(), which only parses literals (numbers, strings, lists, dicts, etc.) safely: 
 
 import ast 
 
 try: 
+
     user = ast.literal_eval(input("Enter the first number: ")) 
+
     user1 = ast.literal_eval(input("Enter the second number: ")) 
+
     print(user + user1) 
+
 except Exception: 
+
     print("Invalid input!") 
 
 This prevents malicious imports or function calls. 
 
-Other Safer Libraries For mathematical expression parsing, use specialized libraries such as: 
+Other Safer Libraries 
+For mathematical expression parsing, use specialized libraries such as: 
 
 decimal.Decimal (for precise arithmetic) 
+
 sympy (for symbolic math evaluation) 
+
 numexpr (for evaluating numerical expressions safely) 
 
 Avoid exec() 
 
-Why unsafe? exec() is even more dangerous than eval() because it can execute arbitrary Python statements (loops, imports, functions, system calls). This opens the door to full RCE. 
+Why unsafe? 
+exec() is even more dangerous than eval() because it can execute arbitrary Python statements (loops, imports, functions, system calls). This opens the door to full RCE. 
 
 If the application requires dynamic functionality (e.g., running user scripts), sandboxing is essential: 
 
 Use restricted interpreters like RestrictedPython. 
+
 Run user code in isolated containers (Docker, Firejail, VM sandboxes). 
+
 For specific tasks (math, templating, parsing), use purpose-built libraries instead of raw code execution. 
 
 There’s no “safe equivalent” in the Python standard library. 
@@ -164,7 +220,9 @@ Difference from Command Injection
 Command injection happen when user input is passed to system-level commands (e.g., exec(), system(), shell scripts). 
 
 import os 
+
 user_input = input("Enter filename: ") 
+
 os.system(f"cat {user_input}") 
 
 And an attacker could type:  file.txt; rm -rf / 
@@ -177,10 +235,75 @@ http://target.com/ping?host=1.1.1.1
 
 If the server executes ping {host}, you could inject: 1.1.1.1; cat /etc/passwd. 
 
-For code injection: You often need some idea of the programming language. Some knowledge of variables or context is needed to make it useful. Vulnerable if the server directly evaluates user input as code (eval(), exec(), dynamic code execution. 
+For code injection: You often need some idea of the programming language. Some knowledge of variables or context is needed to make it useful. Vulnerable if the server directly evaluates user input as code (eval(), exec(), dynamic code execution).  
 
 In short, command injection lets you “talk to the OS”, while code injection lets you “become the application itself”. 
 
-Factor Command Injection Code Injection Target OS commands Application logic + sometimes OS Access to app internals None Full access to variables, memory, functions Potential impact High (files, network) Very High (app logic, secrets, system) Exploit complexity Usually easier Can require knowledge of app structure Privileges dependency OS-level privileges App-level privileges (may escalate) 
+Factor 
 
-Factor Command Injection Code Injection Knowledge needed Minimal — just find input that reaches shell Moderate — need to know language & context Exploitation complexity Usually easier Usually harder Impact OS-level control, files, network App logic + OS (if you can figure it out) From IP only (no code access) High Medium/Low
+Command Injection 
+
+Code Injection 
+
+Target 
+
+OS commands 
+
+Application logic + sometimes OS 
+
+Access to app internals 
+
+None 
+
+Full access to variables, memory, functions 
+
+Potential impact 
+
+High (files, network) 
+
+Very High (app logic, secrets, system) 
+
+Exploit complexity 
+
+Usually easier 
+
+Can require knowledge of app structure 
+
+Privileges dependency 
+
+OS-level privileges 
+
+App-level privileges (may escalate) 
+
+Factor 
+
+Command Injection 
+
+Code Injection 
+
+Knowledge needed 
+
+Minimal — just find input that reaches shell 
+
+Moderate — need to know language & context 
+
+Exploitation complexity 
+
+Usually easier 
+
+Usually harder 
+
+Impact 
+
+OS-level control, files, network 
+
+App logic + OS (if you can figure it out) 
+
+From IP only (no code access) 
+
+High 
+
+Medium/Low 
+
+</body>
+</html>
