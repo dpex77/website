@@ -10,32 +10,114 @@
       min-height: 100vh;
       margin: 0;
       display: flex;
-      justify-content: center; /* horizontal center */
-      align-items: flex-start; /* stick to the top */
+      flex-direction: column;   /* stack sections vertically */
+      align-items: center;      /* center horizontally */
       background: url('cloud.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #0b1a2b;
     }
+    section {
+      width: 100%;
+      display: flex;
+      justify-content: center;  /* center the card horizontally */
+    }
     .card {
-      margin-top: 2rem; /* some spacing from very top */
+      margin: 2rem 0;
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(11,26,43,0.08);
       background: white;
-      text-align: center;
-      max-width: 640px;
+      text-align: left;   /* better for lists */
+      max-width: 800px;
       width: 90%;
     }
-    h1 { margin: 0 0 .5rem; font-size: clamp(1.6rem,4vw,2.4rem); }
-    p { margin: 0; opacity: .85; }
+    h1 { margin: 0 0 1rem; font-size: clamp(1.8rem,4vw,2.2rem); }
+    h2 { margin: 1rem 0 .5rem; font-size: 1.2rem; }
+    ul { margin: 0 0 1rem 1.2rem; }
+    p { margin: .5rem 0; opacity: .9; }
     footer { margin-top: 1rem; font-size: .85rem; color: #5a6b7b; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Dipesh Parajuli</h1>
-    <p>I’m a cybersecurity engineer by profession and a poet at heart.</p>
-    <footer></footer>
-  </div>
+  <!-- Section 1: Self -->
+  <section>
+    <div class="card">
+      <h1>Self</h1>
+      <p>Systems packet level dissection to application level code.</p>
+      <p>MS in Cybersecurity.</p>
+      <h2>Certifications</h2>
+      <ul>
+        <li>CISSP</li>
+        <li>CCSP</li>
+        <li>CISA</li>
+        <li>AWS Security</li>
+        <li>RHCE</li>
+        <li>CCNP</li>
+        <li>ITIL</li>
+      </ul>
+      <h2>Languages</h2>
+      <p>Bash, Python, Go</p>
+    </div>
+  </section>
+
+  <!-- Section 2: Security Engineering -->
+  <section>
+    <div class="card">
+      <h1>Security Engineering</h1>
+      <h2>Secured SDLC</h2>
+      <p>Threat modelings</p>
+      <h2>Software Vulnerabilities</h2>
+      <h3>Injection Types</h3>
+      <ul>
+        <li>Code Injection</li>
+        <li>Format String Vulnerabilities</li>
+        <li>Insecure Deserialization</li>
+        <li>DNS</li>
+      </ul>
+      <h3>DoS Types</h3>
+      <ul>
+        <li>(To be expanded)</li>
+      </ul>
+      <h2>Security Standards</h2>
+      <ul>
+        <li>ZTA</li>
+        <li>Logging</li>
+        <li>RMF</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 3: System Engineering -->
+  <section>
+    <div class="card">
+      <h1>System Engineering</h1>
+      <ul>
+        <li>TLS 1.2 and TLS 1.3</li>
+        <li>MTU / MSS</li>
+        <li>TCP Features / SACK</li>
+        <li>Stress Testing</li>
+        <li>Protocols</li>
+        <li>SSH</li>
+        <li>DNS</li>
+        <li>DHCP</li>
+        <li>BGP</li>
+        <li>NAT</li>
+        <li>Multicast</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 4: Writing -->
+  <section>
+    <div class="card">
+      <h1>Writing</h1>
+      <ul>
+        <li>A Wonderer Within</li>
+        <li>Essence</li>
+        <li>Experience of Existence</li>
+        <li>Poems</li>
+      </ul>
+    </div>
+  </section>
 </body>
 </html>
