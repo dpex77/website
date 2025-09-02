@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Code Injection</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+      background: url('cloud.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #0b1a2b;
+    }
+    .content {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(0, 102, 204, 0.85);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(11,26,43,0.15);
+      overflow-x: auto;
+    }
+    h1 { font-size: 1.6rem; margin-top: 0; }
+    h2 { font-size: 1.2rem; margin-top: 1.5rem; }
+    pre {
+      background: rgba(0,0,0,0.6);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      color: #d4f0ff;
+    }
+    img {
+      max-width: 100%;
+      margin: 1rem 0;
+      border-radius: 8px;
+    }
+    a.back {
+      display: inline-block;
+      margin-top: 1rem;
+      color: #fff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h1>Code Injection</h1>
+
+    <p>
+      Injecting malicious code into the application so it gets executed.
+      Code injection typically compromises the application but may not directly
+      affect the entire system.
+    </p>
+
+    <h2>Target & Effect</h2>
+    <p><strong>Target:</strong> Application runtime (e.g., Python, PHP, Java, JavaScript).</p>
+    <p><strong>Effect:</strong> Runs in the context of the application itself.</p>
+
+    <h2>Example: Python’s <code>eval</code></h2>
+    <pre>
+user = input("Enter the first number: ")
+user1 = input("Enter the second number: ")
+
+evaluated = eval(user) + eval(user1)
+print(evaluated)
+    </pre>
+
+    <p><em>Safe input:</em> 10 and 15 → output 25</p>
+
+    <p><em>Malicious input:</em></p>
+    <pre>
+__import__('os').system('rm -rf /')
+    </pre>
+
+    <p>
+      This would execute a system command that deletes files.
+      Attackers can also run commands like:
+    </p>
+
+    <pre>
+__import__('subprocess').getoutput('ls')
+    </pre>
+
+    <p><strong>Screenshot placeholder:</strong></p>
+    <img src="images/code-injection-example.png" alt="Code injection demo screenshot">
+
+    <h2>Safe Alternative with <code>ast.literal_eval</code></h2>
+    <pre>
+import ast
+
+user = ast.literal_eval(input("Enter the first number: "))
+user1 = ast.literal_eval(input("Enter the second number: "))
+
+print(user + user1)
+    </pre>
+
+    <h2>Why <code>exec</code> is Worse</h2>
+    <pre>
+user_code = input("Enter Python code: ")
+exec(user_code)
+    </pre>
+    <p>
+      Unlike eval, exec runs any Python code, including imports, loops,
+      and malicious system commands.
+    </p>
+
+    <h2>Defender’s Perspective</h2>
+    <ul>
+      <li>Never trust user input</li>
+      <li>Validate input strictly</li>
+      <li>Sanitize dangerous characters</li>
+      <li>Avoid dynamic code execution (<code>eval</code>, <code>exec</code>)</li>
+      <li>Use contextual encoding (HTML, JS, SQL parameterization, etc.)</li>
+    </ul>
+
+    <h2>Comparison: Code vs Command Injection</h2>
+    <table border="1" cellpadding="8" style="background:white;color:black;">
+      <tr><th>Factor</th><th>Command Injection</th><th>Code Injection</th></tr>
+      <tr><td>Target</td><td>OS commands</td><td>Application logic</td></tr>
+      <tr><td>Knowledge needed</td><td>Minimal</td><td>Language + context</td></tr>
+      <tr><td>Impact</td><td>OS-level control</td><td>App logic + OS</td></tr>
+      <tr><td>Privileges</td><td>OS-level</td><td>App-level</td></tr>
+    </table>
+
+    <a href="index.html" class="back">← Back to Home</a>
+  </div>
+</body>
+</html>
