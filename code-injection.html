@@ -44,10 +44,10 @@ Code injection would mean injecting the malicious code into the application so t
 <h2>2. Vulnerability from an Attacker Perspective:</h2>
 From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious actions, such as:
 
-<b>Arbitrary Command Execution </b>
+<b> Arbitrary Command Execution </b>
 The attacker can run system-level commands (rm -rf /, cat /etc/passwd, netstat, etc.). This effectively gives them control of the host system at the privilege level of the running application.
 
-File System Access 
+<b>File System Access </b>
 Sensitive files such as /etc/shadow, database credentials, or API keys can be accessed and exfiltrated. The attacker can also modify or delete files, causing data corruption or system downtime.
 
 Persistence and Lateral Movement 
@@ -65,7 +65,7 @@ Because code injection targets the interpreter itself (e.g., Python), the attack
 Business and Operational Impact 
 Beyond technical compromise, this can result in:
 
-Service disruption (DoS by deleting critical files).  
+<b>Service disruption (DoS by deleting critical files).</b>  
 Data breaches (regulatory/legal issues).  
 Loss of trust and reputation for the application provider.
 
@@ -75,8 +75,8 @@ Here you are not limited to system commands — you can access internal data, ov
 
 In black-box scenarios, attackers often don’t know upfront which programming language or runtime the application uses. Unlike command injection (where system calls like ls, dir, or whoami are recognizable across environments), code injection requires guessing or inferring the underlying interpreter.
 
-Attackers can discover this through:
-
+<b> Attackers can discover this through: </b>
+<em>
 Error Messages – Many applications reveal the language or stack in verbose error messages (e.g., NameError: name 'foobar' is not defined points to Python).
 
 Behavioral Clues – The way input is processed and output is formatted can give hints (e.g., evaluating mathematical expressions directly suggests eval usage).
@@ -84,12 +84,13 @@ Behavioral Clues – The way input is processed and output is formatted can give
 Payload Probing – Attackers try different payloads (1+1, "a"*5, __import__('os')) and observe the response to deduce the backend language.
 
 Common Frameworks – If the app stack is known (Django, Flask, PHP Laravel, etc.), attackers know which languages are likely behind it.
-
+</em>
+    
 Once identified, the attacker crafts payloads specific to that interpreter. For example:
 
-Python: __import__('os').system('id')  
-PHP: system('id') or eval($_GET['cmd']);  
-Java: reflection or Runtime.getRuntime().exec()
+<b>Python:</b> __import__('os').system('id')  
+<b> PHP: </b> system('id') or eval($_GET['cmd']);  
+<b>Java:</b> reflection or Runtime.getRuntime().exec()
 </div>
 
 <div class="card">
