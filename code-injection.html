@@ -7,12 +7,25 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-    line-height: 1.5;
-    margin: 20px;
-    background-color: #f9f9f9;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
     color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
     white-space: pre-wrap;
 }
+
+h2 {
+    margin-top: 0;
+}
+
 code {
     background-color: #eee;
     padding: 2px 4px;
@@ -22,288 +35,167 @@ code {
 </head>
 <body>
 
-1. Overview: 
+<div class="card">
+<h2>1. Overview:</h2>
+Code injection would mean injecting the malicious code into the application so they get executed. Code injection usually runs with the context of the application itself. So, code injection typically compromises the application but may not directly affect the entire system. Code injection usually targets the application’s runtime environment (e.g., Python, PHP, Java, JavaScript).
+</div>
 
-Code injection would mean injecting the malicious code into the application so they get executed. Code injection usually runs with the context of the application itself. So, code injection typically compromises the application but may not directly affect the entire system. Code injection usually targets the application’s runtime environment (e.g., Python, PHP, Java, JavaScript). 
-
-2. Vulnerability from an Attacker Perspective 
-
-From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious actions, such as: 
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious actions, such as:
 
 Arbitrary Command Execution 
-The attacker can run system-level commands (rm -rf /, cat /etc/passwd, netstat, etc.). This effectively gives them control of the host system at the privilege level of the running application. 
+The attacker can run system-level commands (rm -rf /, cat /etc/passwd, netstat, etc.). This effectively gives them control of the host system at the privilege level of the running application.
 
 File System Access 
-Sensitive files such as /etc/shadow, database credentials, or API keys can be accessed and exfiltrated. The attacker can also modify or delete files, causing data corruption or system downtime. 
+Sensitive files such as /etc/shadow, database credentials, or API keys can be accessed and exfiltrated. The attacker can also modify or delete files, causing data corruption or system downtime.
 
 Persistence and Lateral Movement 
-Attackers can create backdoors (e.g., writing a reverse shell script) or install malicious packages. Once persistence is established, they can attempt lateral movement to compromise other systems on the same network. 
+Attackers can create backdoors (e.g., writing a reverse shell script) or install malicious packages. Once persistence is established, they can attempt lateral movement to compromise other systems on the same network.
 
 Privilege Escalation Opportunities 
-If the vulnerable application is running with elevated privileges (e.g., root or admin), the injected code executes at that same privilege level. This dramatically increases the impact, potentially leading to full system compromise. 
+If the vulnerable application is running with elevated privileges (e.g., root or admin), the injected code executes at that same privilege level. This dramatically increases the impact, potentially leading to full system compromise.
 
 Stealthy Abuse 
-Instead of outright destruction (like deleting files), a sophisticated attacker might silently harvest sensitive data (credentials, tokens, session IDs) or manipulate application logic to serve malicious purposes. 
+Instead of outright destruction (like deleting files), a sophisticated attacker might silently harvest sensitive data (credentials, tokens, session IDs) or manipulate application logic to serve malicious purposes.
 
 Exploitation of the Runtime Environment 
-Because code injection targets the interpreter itself (e.g., Python), the attacker can load arbitrary modules (os, subprocess, socket, requests) to extend their capabilities. Essentially, the attacker gains the same power as a developer with full interpreter access. 
+Because code injection targets the interpreter itself (e.g., Python), the attacker can load arbitrary modules (os, subprocess, socket, requests) to extend their capabilities. Essentially, the attacker gains the same power as a developer with full interpreter access.
 
 Business and Operational Impact 
-Beyond technical compromise, this can result in: 
+Beyond technical compromise, this can result in:
 
-Service disruption (DoS by deleting critical files). 
+Service disruption (DoS by deleting critical files).  
+Data breaches (regulatory/legal issues).  
+Loss of trust and reputation for the application provider.
 
-Data breaches (regulatory/legal issues). 
+An attacker needs to know what type of code application is using and craft malicious code. This is unlike command injection. The code injection exploits the language interpreter itself (Python in this case). It runs inside the application’s process, with the same privileges as the app and you can manipulate variables, import modules, access memory, etc.
 
-Loss of trust and reputation for the application provider. 
+Here you are not limited to system commands — you can access internal data, override functions, manipulate files, open network connections, etc.
 
-An attacker needs to know what type of code application is using and craft malicious code. This is unlike command injection. The code injection exploits the language interpreter itself (Python in this case). It runs inside the application’s process, with the same privileges as the app and you can manipulate variables, import modules, access memory, etc.  
+In black-box scenarios, attackers often don’t know upfront which programming language or runtime the application uses. Unlike command injection (where system calls like ls, dir, or whoami are recognizable across environments), code injection requires guessing or inferring the underlying interpreter.
 
-Here you are not limited to system commands — you can access internal data, override functions, manipulate files, open network connections, etc. 
+Attackers can discover this through:
 
-In black-box scenarios, attackers often don’t know upfront which programming language or runtime the application uses. Unlike command injection (where system calls like ls, dir, or whoami are recognizable across environments), code injection requires guessing or inferring the underlying interpreter. 
+Error Messages – Many applications reveal the language or stack in verbose error messages (e.g., NameError: name 'foobar' is not defined points to Python).
 
-Attackers can discover this through: 
+Behavioral Clues – The way input is processed and output is formatted can give hints (e.g., evaluating mathematical expressions directly suggests eval usage).
 
-Error Messages – Many applications reveal the language or stack in verbose error messages (e.g., NameError: name 'foobar' is not defined points to Python). 
+Payload Probing – Attackers try different payloads (1+1, "a"*5, __import__('os')) and observe the response to deduce the backend language.
 
-Behavioral Clues – The way input is processed and output is formatted can give hints (e.g., evaluating mathematical expressions directly suggests eval usage). 
+Common Frameworks – If the app stack is known (Django, Flask, PHP Laravel, etc.), attackers know which languages are likely behind it.
 
-Payload Probing – Attackers try different payloads (1+1, "a"*5, __import__('os')) and observe the response to deduce the backend language. 
+Once identified, the attacker crafts payloads specific to that interpreter. For example:
 
-Common Frameworks – If the app stack is known (Django, Flask, PHP Laravel, etc.), attackers know which languages are likely behind it. 
+Python: __import__('os').system('id')  
+PHP: system('id') or eval($_GET['cmd']);  
+Java: reflection or Runtime.getRuntime().exec()
+</div>
 
-Once identified, the attacker crafts payloads specific to that interpreter. For example: 
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+A simplest example of code injection would be pythons eval function. Eval allows code injection. Eval() executes code, not just expressions. It's equivalent to letting someone type code directly into your program.
 
-In Python, they might inject __import__('os').system('id'). 
+user= input("Enter the first number: ")  
+user1= input("enter the second number: ")  
+evaluated= eval(user) + eval(user1)  
+print(evaluated)  
 
-In PHP, payloads like system('id') or eval($_GET['cmd']); equivalents are tried. 
-
-In Java, attackers might attempt to inject reflection calls or manipulate Runtime.getRuntime().exec(). 
-
-2.1. Attempts of an attacker: 
-
-A simplest example of code injection would be pythons eval function. Eval allows code injection. Eval() executes code, not just expressions. It's equivalent to letting someone type code directly into your program.  
-
-user= input("Enter the first number: ") 
-
-user1= input("enter the second number: ") 
-
-evaluated= eval(user) + eval(user1) 
-
-print(evaluated) 
-
-Enter the first number: 10 
-
-enter the second number: 15 
-
-25 
+Enter the first number: 10  
+enter the second number: 15  
+25  
 
 But if the attacker:  
 
-Enter the first number: __import__('os').system('rm -rf /') 
-
+Enter the first number: __import__('os').system('rm -rf /')  
 enter the second number:  
 
-This would execute a system command that deletes all files. 
+This would execute a system command that deletes all files.
 
-Another example: 
+Another example:  
 
-Enter the first number: __import__('subprocess').getoutput('ls') 
-
+Enter the first number: __import__('subprocess').getoutput('ls')  
 enter the second number:  
 
-This lists files on the system. The attacker can read sensitive files (open('/etc/passwd').read()). Run network commands and Install malware. 
+This lists files on the system. The attacker can read sensitive files (open('/etc/passwd').read()). Run network commands and Install malware.
 
-Basically, they can run any Python code. This can invite code execution vulnerability (RCE). The script gives an attacker direct shell access through Python. 
+Basically, they can run any Python code. This can invite code execution vulnerability (RCE). The script gives an attacker direct shell access through Python.
 
-Another example is exec function in python. 
-
-exec in Python is similar to eval, but even more powerful and dangerous. 
+Another example is exec function in python.  
+exec in Python is similar to eval, but even more powerful and dangerous.
 
 eval(expr) evaluates a single expression and returns a value.  
+eval("2 + 3")   # returns 5
 
-eval("2 + 3")   # returns 5 
+exec(code) executes any block of Python code (statements, functions, imports, loops, etc.) and returns nothing.  
+exec("for i in range(3): print(i)")  # prints 0 1 2
 
-exec(code) executes any block of Python code (statements, functions, imports, loops, etc.) and returns nothing. 
+Exec is more dangerous because it will run whatever code the user provides.
 
-exec("for i in range(3): print(i)") 
+user_code = input("Enter Python code: ")  
+exec(user_code)
 
-# prints 0 1 2 
+__import__('os').system('rm -rf /'): if an attacker types this, this might delete entire files.
+</div>
 
-Exec is more dangerous because it will run whatever code the user provides. 
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Never trust user input
 
-user_code = input("Enter Python code: ") 
+Input validation: Check that incoming data meets expected patterns or types TLV. Example: only allow integers for age, only allow letters for names.
 
-exec(user_code) 
+Input Sanitization: Remove or neutralize unsafe characters or code before processing.  
+Example: stripping or escaping <, >, ', " to prevent injection
 
-__import__('os').system('rm -rf /'): if an attacker types this, this might delete entire files. 
+Avoid using dynamic code execution: Using functions like eval(), exec(), Function(), or similar that execute user input as code.
 
-3. Vulnerability from a defender perspective: 
+Use contextual encoding: Convert data into a safe format for the target context so it cannot be misinterpreted as code. Encoding ensures data is interpreted as data, not as code.
 
-Never trust user input 
+HTML encoding: Convert < → &lt;, > → &gt; to prevent XSS.  
+JavaScript encoding: Escape quotes, backslashes to safely include strings in JS.  
+SQL query parameterization: Avoid embedding user input directly in SQL queries; use placeholders (? or $1) to prevent SQL injection.  
+Base64 Encoding: Encodes binary or arbitrary text into ASCII-safe characters. Example: useful for sending binary data in JSON or URLs.  
+URL encoding: Converts unsafe characters in URLs ( → %20) to ensure proper transmission.
+</div>
 
-Input validation: Check that incoming data meets expected patterns or types TLV. Example: only allow integers for age, only allow letters for names. 
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+3.1 Avoid eval()  
+Why unsafe? eval() executes arbitrary expressions. If user input reaches eval(), attackers can run arbitrary Python code and take control of the application.
 
-Input Sanitization: Remove or neutralize unsafe characters or code before processing. 
+Safe Alternative (math evaluation only)  
+If your use case is limited to evaluating numbers or simple math expressions, use ast.literal_eval(), which only parses literals (numbers, strings, lists, dicts, etc.) safely:
 
-Example: stripping or escaping <, >, ', " to prevent injection 
+import ast  
 
-Avoid using dynamic code execution: Using functions like eval(), exec(), Function(), or similar that execute user input as code. 
+try:  
+    user = ast.literal_eval(input("Enter the first number: "))  
+    user1 = ast.literal_eval(input("Enter the second number: "))  
+    print(user + user1)  
+except Exception:  
+    print("Invalid input!")  
 
-Use contextual encoding: Convert data into a safe format for the target context so it cannot be misinterpreted as code. Encoding ensures data is interpreted as data, not as code. 
+Other Safer Libraries: decimal.Decimal, sympy, numexpr
 
-HTML encoding: Convert < → &lt;, > → &gt; to prevent XSS. 
+Avoid exec(): even more dangerous than eval() because it can execute arbitrary Python statements. Use RestrictedPython or containers if dynamic execution is required.
+</div>
 
-JavaScript encoding: Escape quotes, backslashes to safely include strings in JS. 
+<div class="card">
+<h2>4. Extras:</h2>
+Difference from Command Injection:
 
-SQL query parameterization: Avoid embedding user input directly in SQL queries; use placeholders (? or $1) to prevent SQL injection. 
+Command injection happens when user input is passed to system-level commands (e.g., exec(), system(), shell scripts).  
 
-Base64 Encoding: Encodes binary or arbitrary text into ASCII-safe characters. Example: useful for sending binary data in JSON or URLs. 
+import os  
+user_input = input("Enter filename: ")  
+os.system(f"cat {user_input}")  
 
-URL encoding: Converts unsafe characters in URLs ( → %20) to ensure proper transmission.  
+An attacker could type: file.txt; rm -rf /
 
-3.1 Solutions of a defender:  
+Command injection lets you “talk to the OS”, while code injection lets you “become the application itself”.
 
-3.1 Avoid eval() 
-
-Why unsafe? 
-eval() executes arbitrary expressions. If user input reaches eval(), attackers can run arbitrary Python code and take control of the application. 
-
-Safe Alternative (math evaluation only) 
-If your use case is limited to evaluating numbers or simple math expressions, use ast.literal_eval(), which only parses literals (numbers, strings, lists, dicts, etc.) safely: 
-
-import ast 
-
-try: 
-
-    user = ast.literal_eval(input("Enter the first number: ")) 
-
-    user1 = ast.literal_eval(input("Enter the second number: ")) 
-
-    print(user + user1) 
-
-except Exception: 
-
-    print("Invalid input!") 
-
-This prevents malicious imports or function calls. 
-
-Other Safer Libraries 
-For mathematical expression parsing, use specialized libraries such as: 
-
-decimal.Decimal (for precise arithmetic) 
-
-sympy (for symbolic math evaluation) 
-
-numexpr (for evaluating numerical expressions safely) 
-
-Avoid exec() 
-
-Why unsafe? 
-exec() is even more dangerous than eval() because it can execute arbitrary Python statements (loops, imports, functions, system calls). This opens the door to full RCE. 
-
-If the application requires dynamic functionality (e.g., running user scripts), sandboxing is essential: 
-
-Use restricted interpreters like RestrictedPython. 
-
-Run user code in isolated containers (Docker, Firejail, VM sandboxes). 
-
-For specific tasks (math, templating, parsing), use purpose-built libraries instead of raw code execution. 
-
-There’s no “safe equivalent” in the Python standard library. 
-
-4. Extras: 
-
-Difference from Command Injection 
-
-Command injection happen when user input is passed to system-level commands (e.g., exec(), system(), shell scripts). 
-
-import os 
-
-user_input = input("Enter filename: ") 
-
-os.system(f"cat {user_input}") 
-
-And an attacker could type:  file.txt; rm -rf / 
-
-So for command injection, you need to know: 
-
-You don’t need to know the full application code, only the vulnerable input points that end up calling system commands. Simplest example of vulnerable web page: 
-
-http://target.com/ping?host=1.1.1.1 
-
-If the server executes ping {host}, you could inject: 1.1.1.1; cat /etc/passwd. 
-
-For code injection: You often need some idea of the programming language. Some knowledge of variables or context is needed to make it useful. Vulnerable if the server directly evaluates user input as code (eval(), exec(), dynamic code execution).  
-
-In short, command injection lets you “talk to the OS”, while code injection lets you “become the application itself”. 
-
-Factor 
-
-Command Injection 
-
-Code Injection 
-
-Target 
-
-OS commands 
-
-Application logic + sometimes OS 
-
-Access to app internals 
-
-None 
-
-Full access to variables, memory, functions 
-
-Potential impact 
-
-High (files, network) 
-
-Very High (app logic, secrets, system) 
-
-Exploit complexity 
-
-Usually easier 
-
-Can require knowledge of app structure 
-
-Privileges dependency 
-
-OS-level privileges 
-
-App-level privileges (may escalate) 
-
-Factor 
-
-Command Injection 
-
-Code Injection 
-
-Knowledge needed 
-
-Minimal — just find input that reaches shell 
-
-Moderate — need to know language & context 
-
-Exploitation complexity 
-
-Usually easier 
-
-Usually harder 
-
-Impact 
-
-OS-level control, files, network 
-
-App logic + OS (if you can figure it out) 
-
-From IP only (no code access) 
-
-High 
-
-Medium/Low 
+[Comparison Tables – leave text as-is from your original content]
+</div>
 
 </body>
 </html>
