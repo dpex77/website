@@ -1,267 +1,148 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Code Injection — Security Notes</title>
-  <meta name="description" content="What is Code Injection? Examples, risks, and safer alternatives in Python.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Injection</title>
   <style>
-    :root{
-      --ink:#0b1a2b;
-      --muted:#5a6b7b;
-      --brand:#0066cc;
-      --card-bg:#ffffff;
-      --hero-overlay:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.45));
-      --radius:14px;
-      --shadow:0 10px 30px rgba(11,26,43,.15);
-      --code-bg:#0e1116;
-      --code-fg:#e6edf3;
-      --table-head:#e9f2ff;
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
     }
-
-    /* Reset-ish */
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color:var(--ink);
-      line-height:1.6;
-      background:#f5f8fc;
+    .container {
+      max-width: 900px;
+      margin: 80px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
     }
-    a{color:var(--brand); text-decoration:none}
-    a:hover{text-decoration:underline}
-
-    /* Hero */
-    .hero{
-      position:relative;
-      min-height: 40vh;
-      display:grid;
-      place-items:center;
-      text-align:center;
-      color:#fff;
-      background:
-        var(--hero-overlay),
-        url('hero-code-injection.jpg') center/cover no-repeat;
+    h1, h2, h3 {
+      color: #222;
     }
-    .hero .inner{
-      padding: clamp(2rem,4vw,3rem);
-      width:min(100%, 1100px);
-    }
-    .breadcrumbs{
-      font-size:.9rem;
-      opacity:.9;
-      margin-bottom: .75rem;
-    }
-    .breadcrumbs a{color:#fff; opacity:.9}
-    .hero h1{
-      margin:.25rem 0 .5rem;
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      letter-spacing:.2px;
-    }
-    .hero p{
-      margin:0 auto;
-      max-width: 800px;
-      opacity:.95;
-    }
-
-    /* Layout */
-    .wrap{
-      width:min(100%, 1100px);
-      margin:-30px auto 3rem; /* pull up over hero */
-      padding: 0 1rem;
-    }
-    .content{
-      background:var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(1rem, 3vw, 2rem);
-    }
-
-    /* Optional local TOC */
-    .toc{
-      background:#f0f6ff;
-      border:1px solid #d7e6ff;
-      border-radius:12px;
-      padding:1rem;
-      margin:0 0 1.25rem 0;
-    }
-    .toc strong{display:block; margin-bottom:.5rem}
-    .toc a{display:block; padding:.2rem 0}
-
-    /* Typography */
-    h2{font-size: clamp(1.2rem, 3vw, 1.5rem); margin:1.5rem 0 .5rem}
-    h3{font-size:1.05rem; margin:1rem 0 .4rem; color:var(--muted)}
-    p{margin:.6rem 0}
-    ul{margin:.4rem 0 .9rem 1.1rem}
-    li{margin:.25rem 0}
-    .note{background:#eef7ff; border-left:4px solid var(--brand); padding:.75rem 1rem; border-radius:10px; margin:1rem 0}
-
-    /* Code & pre */
-    pre{
-      background: var(--code-bg);
-      color: var(--code-fg);
-      border-radius: 10px;
-      padding: 1rem;
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 6px;
       overflow-x: auto;
-      margin:.7rem 0 1rem;
     }
-    code{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:.95em}
-
-    /* Media */
-    figure{margin:1rem 0}
-    figure img{
-      width:100%;
-      height:auto;
-      border-radius:12px;
-      box-shadow: var(--shadow);
-      display:block;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
     }
-    figure figcaption{
-      font-size:.9rem; color:var(--muted); margin-top:.4rem
+    table, th, td {
+      border: 1px solid #ccc;
     }
-
-    /* Table */
-    table{width:100%; border-collapse:collapse; margin:1rem 0}
-    th, td{padding:.7rem .6rem; border:1px solid #dfe6ee; text-align:left; vertical-align:top}
-    th{background:var(--table-head)}
-
-    /* Footer nav */
-    .bottom-nav{
-      display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; justify-content:space-between;
-      margin-top:1.5rem
+    th, td {
+      padding: 10px;
+      text-align: left;
     }
-    .chip{
-      display:inline-block; padding:.35rem .65rem; background:#eef7ff; border:1px solid #d7e6ff; border-radius:999px; font-size:.85rem; color:#1a4b8f
-    }
-
-    /* Small screens */
-    @media (max-width: 720px){
-      .wrap{margin:-24px auto 2rem}
+    th {
+      background-color: #f0f0f0;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Code Injection</h1>
+    <p>Injecting malicious code into the application so it gets executed. Code injection typically compromises the application but may not directly affect the entire system.</p>
+    
+    <h2>Target</h2>
+    <p>The application's runtime environment (e.g., Python, PHP, Java, JavaScript).</p>
+    
+    <h2>Effect</h2>
+    <p>Runs in the context of the application itself.</p>
 
-  <!-- HERO with background image -->
-  <header class="hero">
-    <div class="inner">
-      <nav class="breadcrumbs">
-        <a href="index.html">Home</a> / <span>Code Injection</span>
-      </nav>
-      <h1>Code Injection</h1>
-      <p>What it is, how it’s exploited, examples in Python (<code>eval</code>/<code>exec</code>), and safer alternatives developers should use.</p>
-    </div>
-  </header>
-
-  <!-- MAIN CONTENT -->
-  <main class="wrap">
-    <article class="content">
-      <!-- Optional in-page TOC -->
-      <aside class="toc">
-        <strong>On this page</strong>
-        <a href="#overview">Overview</a>
-        <a href="#example-eval">Example: Python <code>eval()</code></a>
-        <a href="#example-exec">Why <code>exec()</code> is worse</a>
-        <a href="#safe-alternatives">Safer alternatives</a>
-        <a href="#code-vs-command">Code vs Command Injection</a>
-        <a href="#defender">Defender perspective</a>
-      </aside>
-
-      <section id="overview">
-        <h2>Overview</h2>
-        <p><strong>Code Injection</strong> is when an attacker injects malicious code that the application then executes. It typically compromises the application itself and runs with the app’s privileges.</p>
-        <p><strong>Target:</strong> The application’s runtime (e.g., Python, PHP, Java, JavaScript).<br>
-           <strong>Effect:</strong> Runs in the application’s context.</p>
-
-        <!-- Screenshot placeholder -->
-        <figure>
-          <img src="images/code-injection-example.png" alt="Demo of code injection via unsafe eval input">
-          <figcaption>Example UI screenshot placeholder (replace with your own).</figcaption>
-        </figure>
-      </section>
-
-      <section id="example-eval">
-        <h2>Example: Python’s <code>eval()</code></h2>
-        <pre><code>user  = input("Enter the first number: ")
+    <h2>Example in Python (Unsafe)</h2>
+    <pre>
+user = input("Enter the first number: ")
 user1 = input("Enter the second number: ")
 
 evaluated = eval(user) + eval(user1)
-print(evaluated)</code></pre>
-
-        <p><em>Normal input:</em></p>
-        <pre><code>Enter the first number: 10
+print(evaluated)
+    </pre>
+    <p>Example Input:</p>
+    <pre>
+Enter the first number: 10
 Enter the second number: 15
-25</code></pre>
+Output: 25
+    </pre>
 
-        <p><em>Malicious input:</em></p>
-        <pre><code>Enter the first number: __import__('os').system('rm -rf /')
-Enter the second number:</code></pre>
+    <h2>Malicious Input</h2>
+    <pre>
+Enter the first number: __import__('os').system('rm -rf /')
+Enter the second number:
+    </pre>
+    <p>This could delete all files on the system.</p>
 
-        <p>That command would attempt to delete files on the system. Attackers can also do:</p>
-        <pre><code>__import__('subprocess').getoutput('ls')</code></pre>
+    <h2>Safe Alternative in Python</h2>
+    <pre>
+import ast
 
-        <div class="note">
-          <strong>Why this is dangerous:</strong> <code>eval()</code> executes code, not just expressions.
-          Treating untrusted input as code is equivalent to handing the keyboard to an attacker.
-        </div>
-      </section>
-
-      <section id="safe-alternatives">
-        <h2>Safer alternative for math-only input</h2>
-        <pre><code>import ast
-
-user  = ast.literal_eval(input("Enter the first number: "))
+user = ast.literal_eval(input("Enter the first number: "))
 user1 = ast.literal_eval(input("Enter the second number: "))
 
-print(user + user1)</code></pre>
-        <p><code>ast.literal_eval</code> only evaluates Python literals (strings, numbers, tuples, lists, dicts, booleans, and <code>None</code>)—not arbitrary code.</p>
-      </section>
+print(user + user1)
+    </pre>
 
-      <section id="example-exec">
-        <h2>Why <code>exec()</code> is even worse</h2>
-        <pre><code>user_code = input("Enter Python code: ")
-exec(user_code)</code></pre>
-        <p><code>exec()</code> executes any Python statements (functions, loops, imports, system calls). For example:
-        <code>__import__('os').system('rm -rf /')</code> could attempt to wipe files.</p>
-      </section>
+    <h2>Understanding eval() vs exec()</h2>
+    <p><strong>eval(expr)</strong>: Evaluates a single expression and returns a value.</p>
+    <pre>eval("2 + 3")   # returns 5</pre>
+    <p><strong>exec(code)</strong>: Executes any block of Python code (statements, functions, imports, loops) and returns nothing.</p>
+    <pre>exec("for i in range(3): print(i)")   # prints 0 1 2</pre>
 
-      <section id="code-vs-command">
-        <h2>Code Injection vs Command Injection</h2>
-        <p><strong>Command Injection</strong> occurs when untrusted input is passed to OS-level commands (e.g., <code>system()</code>). Example:</p>
-        <pre><code>import os
-user_input = input("Enter filename: ")
-os.system(f"cat {user_input}")   # e.g., attacker: "file.txt; rm -rf /"</code></pre>
+    <h2>Attacker Perspective</h2>
+    <p>Need to know the language and application context to craft malicious code. Can manipulate variables, import modules, access memory, override functions, and execute arbitrary Python code.</p>
 
-        <table>
-          <tr><th>Factor</th><th>Command Injection</th><th>Code Injection</th></tr>
-          <tr><td>Target</td><td>OS commands</td><td>Application runtime / logic</td></tr>
-          <tr><td>Access to internals</td><td>None</td><td>Full access to app variables, functions</td></tr>
-          <tr><td>Potential impact</td><td>High (files, network)</td><td>Very high (app logic, secrets, possibly OS)</td></tr>
-          <tr><td>Knowledge needed</td><td>Low (find input to shell)</td><td>Moderate (language & context)</td></tr>
-          <tr><td>Privilege context</td><td>OS-level execution</td><td>App-level execution (may escalate)</td></tr>
-        </table>
-      </section>
+    <h2>Difference Between Code Injection and Command Injection</h2>
+    <table>
+      <tr>
+        <th>Factor</th>
+        <th>Command Injection</th>
+        <th>Code Injection</th>
+      </tr>
+      <tr>
+        <td>Target</td>
+        <td>OS commands</td>
+        <td>Application logic + sometimes OS</td>
+      </tr>
+      <tr>
+        <td>Access</td>
+        <td>App internals: None</td>
+        <td>Full access to variables, memory, functions</td>
+      </tr>
+      <tr>
+        <td>Potential Impact</td>
+        <td>High (files, network)</td>
+        <td>Very High (app logic, secrets, system)</td>
+      </tr>
+      <tr>
+        <td>Exploit Complexity</td>
+        <td>Usually easier</td>
+        <td>Can require knowledge of app structure</td>
+      </tr>
+      <tr>
+        <td>Privileges</td>
+        <td>OS-level</td>
+        <td>App-level (may escalate)</td>
+      </tr>
+    </table>
 
-      <section id="defender">
-        <h2>Defender Perspective</h2>
-        <ul>
-          <li><strong>Never trust user input.</strong></li>
-          <li><strong>Validate</strong> types/patterns (only integers where integers are expected, etc.).</li>
-          <li><strong>Sanitize</strong> / neutralize dangerous characters for the target context.</li>
-          <li><strong>Avoid dynamic code execution:</strong> no <code>eval()</code>, <code>exec()</code>, or equivalents on untrusted input.</li>
-          <li><strong>Use contextual encoding:</strong> HTML encoding (e.g., <code>&lt;</code>), JS escaping, SQL parameterization, URL encoding, Base64 where appropriate.</li>
-        </ul>
-      </section>
-
-      <div class="bottom-nav">
-        <a href="index.html" class="chip">← Back to Home</a>
-        <div class="tags">
-          <span class="chip">Python</span>
-          <span class="chip">AppSec</span>
-          <span class="chip">RCE</span>
-        </div>
-      </div>
-    </article>
-  </main>
+    <h2>Defender Perspective</h2>
+    <ul>
+      <li>Never trust user input.</li>
+      <li>Input validation: Allow only expected types or patterns.</li>
+      <li>Input sanitization: Remove or neutralize unsafe characters or code.</li>
+      <li>Avoid dynamic code execution functions: eval(), exec(), Function().</li>
+      <li>Contextual encoding: HTML, JS, SQL encoding to prevent injection.</li>
+      <li>Use parameterized queries instead of string concatenation in databases.</li>
+      <li>Use Base64 or URL encoding where appropriate.</li>
+    </ul>
+  </div>
 </body>
 </html>
