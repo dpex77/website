@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unrestricted File Upload</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Unrestricted File Upload occurs when an application allows users to upload files without proper validation or restrictions. This can lead to security issues such as DoS, malware execution, path traversal, or sensitive data exposure.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers can exploit unrestricted file uploads to:  
+
+- Upload very large files or multiple files to exhaust server resources (DoS).  
+- Upload executable scripts (e.g., .php, .exe) to gain remote code execution.  
+- Exploit improper filename handling for path traversal attacks to overwrite or read sensitive files.  
+- Overwrite important files or leak sensitive data.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Uploading a .php web shell to gain remote access.  
+- Uploading oversized files repeatedly to crash the server.  
+- Crafting filenames like ../../etc/passwd to overwrite system files.  
+- Uploading malware to infect server or client machines.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- No validation on file type, size, or content.  
+- Relying only on file extensions, which can be easily bypassed.  
+- Unsanitized filenames used in filesystem paths.  
+- Lack of malware scanning or content inspection on uploads.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions of a Defender:</h2>
+<b>Type / Extension Validation:</b>  
+- Only allow specific file types (e.g., .jpg, .png, .pdf).  
+- Check MIME type and magic numbers; do not rely solely on extensions.  
+
+<b>Length / Size Restriction:</b>  
+- Set maximum file size to prevent resource exhaustion.  
+- Example in Python Flask: <code>app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024</code>  <!-- 5MB -->
+
+<b>Value / Content Inspection / Sanitization:</b>  
+- Remove or sanitize dangerous content if necessary.  
+- Scan uploaded files for malware or scripts.  
+
+<b>Filename Sanitization:</b>  
+- Strip or normalize path characters.  
+- Store files in controlled directories with generated filenames.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- TLV approach (Type, Length, Value) provides a structured way to validate uploads.  
+- Combined with proper permissions and server-side checks, unrestricted file uploads can be effectively mitigated.  
+- Always assume uploaded files are hostile until validated and sanitized.
+</div>
+
+</body>
+</html>
