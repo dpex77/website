@@ -46,53 +46,58 @@ Cross-Site Scripting (XSS) is a vulnerability that allows attackers to inject ma
 </div>
 
 <div class="card">
-<h2>2. How it happens:</h2>
-XSS occurs when user input is not properly sanitized or encoded, allowing scripts such as:
-
-<code>&lt;script&gt;malicious_code&lt;/script&gt;</code>
-
-to run directly in the browser.
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+XSS occurs when user input is not properly sanitized or encoded, allowing scripts such as:  
+<code>&lt;script&gt;malicious_code&lt;/script&gt;</code> to run directly in the browser.
 </div>
 
 <div class="card">
-<h2>3. Types of XSS:</h2>
+<h2>2.1 Attempts of an Attacker:</h2>
+Types of XSS:
 
 <b>Reflected XSS</b>  
 - The payload is embedded in a crafted link or request.  
 - The server reflects this payload in its response without storing it.  
 - Attackers trick victims into clicking the malicious link (via email, social media, phishing, etc.).  
-- When the victim loads the page, the script executes in their browser.  
-<b>Key point:</b> requires user interaction.  
-
----
+- Key point: requires user interaction.
 
 <b>Stored XSS</b>  
 - The payload is saved on the server (e.g., in comment boxes, profile fields, forum posts, chat messages).  
 - Example: <code>&lt;script&gt;alert('Hacked!')&lt;/script&gt;</code>  
 - If unsanitized, every user who views the page triggers the script.  
-<b>Key point:</b> no attacker interaction is needed after the payload is stored—making this more dangerous.  
-
----
+- Key point: no attacker interaction is needed after the payload is stored—making this more dangerous.
 
 <b>DOM-Based XSS</b>  
 - The vulnerability exists entirely in client-side JavaScript.  
 - The server may never see the malicious input.  
-- Example:  
-
-<code>document.getElementById('output').innerHTML = location.hash;</code>  
-
-When a user visits a URL with a malicious fragment (e.g., <code>#&lt;script&gt;alert('XSS')&lt;/script&gt;</code>), the script executes in their browser.  
-
-<b>Key point:</b> purely client-side, triggered by unsafe DOM manipulation.
+- Example: <code>document.getElementById('output').innerHTML = location.hash;</code>  
+- When a user visits a URL with a malicious fragment (e.g., #<script>alert('XSS')</script>), the script executes in their browser.  
+- Key point: purely client-side, triggered by unsafe DOM manipulation.
 </div>
 
 <div class="card">
-<h2>4. Prevention:</h2>
-- <b>Input validation:</b> Reject or filter dangerous inputs (&lt;, &gt;, &lt;script&gt;).  
-- <b>Output encoding:</b> Encode user data before rendering it in HTML, JavaScript, or URLs.  
-- <b>Content Security Policy (CSP):</b> Restrict which scripts can execute on the page.  
-- <b>HTTP-only cookies:</b> Prevent JavaScript from accessing sensitive session data.  
-- <b>Safe DOM handling:</b> Avoid inserting untrusted data directly into <code>innerHTML</code>; use <code>textContent</code> or safe templating libraries.  
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- Input validation: Reject or filter dangerous inputs (<, >, <script>).  
+- Output encoding: Encode user data before rendering it in HTML, JavaScript, or URLs.  
+- Content Security Policy (CSP): Restrict which scripts can execute on the page.  
+- HTTP-only cookies: Prevent JavaScript from accessing sensitive session data.  
+- Safe DOM handling: Avoid inserting untrusted data directly into innerHTML; use textContent or safe templating libraries.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Validate all user inputs and sanitize outputs.  
+- Apply strict CSP headers.  
+- Encode outputs in the appropriate context (HTML, JS, URL).  
+- Set HTTP-only flags for cookies to prevent access via JS.  
+- Use safe templating methods to handle dynamic content.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- XSS is dangerous because it runs in the victim’s browser context.  
+- Stored XSS is typically more severe than reflected XSS.  
+- DOM-based XSS requires understanding of client-side JavaScript behavior.
 </div>
 
 </body>
