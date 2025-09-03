@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log Injection</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Log Injection is a type of security vulnerability where an attacker manipulates the log files of an application to:
+
+- Insert malicious entries  
+- Obfuscate their actions  
+- Inject false information  
+- Break log parsing or analysis tools
+</div>
+
+<div class="card">
+<h2>2. Causes:</h2>
+- Logs Writable by Attackers  
+- Unvalidated Input Written to Logs
+</div>
+
+<div class="card">
+<h2>3. Defensive Measures:</h2>
+- <b>Sanitize user input before logging:</b> Escape newline characters, special symbols, or other control characters.  
+- <b>Strict file permissions:</b> Set strict file permissions (e.g., chmod 640) so only the application or authorized user can write.  
+- <b>Use append-only logs where possible:</b> Consider immutable logging solutions to prevent tampering.  
+- <b>Monitoring:</b> Keep an eye on unusual log entries, patterns, or unexpected log growth.
+</div>
+
+</body>
+</html>
