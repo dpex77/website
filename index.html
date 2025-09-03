@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vulnerabilities & Security</title>
+  <title>Security Overview</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -30,6 +30,7 @@
       padding: 20px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       overflow-y: auto;
+      max-height: 90vh;
     }
 
     .card h2 {
@@ -42,10 +43,11 @@
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
 
     li {
-      margin: 8px 0;
+      margin: 6px 0;
       padding: 6px 8px;
       background: #f9f9f9;
       border-left: 4px solid #4CAF50;
@@ -69,16 +71,57 @@
     <div class="card">
       <h2>Software/Network Vulnerabilities</h2>
       <ul>
-        <li>Injection related: Code Injection, Command Injection, SQL, Format String, HTTP Injection, Log Injection, Unrestricted File Upload</li>
-        <li>DoS related: SYN Flood</li>
-        <li>Web Security: CSRF, XSS, SSRF, Clickjacking, CORS</li>
-        <li>Session Management related</li>
-        <li>Authentication Related: Broken Access Control, Privilege Escalation (IDOR), Attacks Against OAuth, Insufficiently Protected Credentials, Error Handling, Missing Authentication for Critical Function, BOLA vs BFLA, Insufficient Credential Hygiene</li>
-        <li>Race Conditions: Business Logic</li>
-        <li>Security Misconfigurations: Insufficient Logging & Monitoring, Database, Software and Integrity Failures</li>
-        <li>Cryptography</li>
-        <li>Configuration Management: Improper Inventory</li>
-        <li>Memory/Runtime Issues: Use After Free, TOC/TOU, Null Pointer Dereference, Buffer Overflow</li>
+        <!-- Injection -->
+        <li><a href="code-injection.html">Code Injection</a></li>
+        <li><a href="command-injection.html">Command Injection</a></li>
+        <li><a href="sql-injection.html">SQL Injection</a></li>
+        <li><a href="format-string.html">Format String</a></li>
+        <li><a href="http-injection.html">HTTP Injection</a></li>
+        <li><a href="log-injection.html">Log Injection</a></li>
+        <li><a href="file-upload.html">Unrestricted File Upload</a></li>
+
+        <!-- DoS -->
+        <li><a href="syn-flood.html">SYN Flood (DoS)</a></li>
+
+        <!-- Web Security -->
+        <li><a href="csrf.html">CSRF</a></li>
+        <li><a href="xss.html">XSS</a></li>
+        <li><a href="ssrf.html">SSRF</a></li>
+        <li><a href="clickjacking.html">Clickjacking</a></li>
+        <li><a href="cors.html">CORS Misconfigurations</a></li>
+
+        <!-- Session Management -->
+        <li><a href="session-management.html">Session Management Issues</a></li>
+
+        <!-- Authentication & Access Control -->
+        <li><a href="broken-access-control.html">Broken Access Control</a></li>
+        <li><a href="idor.html">Privilege Escalation (IDOR)</a></li>
+        <li><a href="oauth.html">Attacks Against OAuth</a></li>
+        <li><a href="credentials.html">Insufficiently Protected Credentials</a></li>
+        <li><a href="error-handling.html">Error Handling</a></li>
+        <li><a href="missing-auth.html">Missing Authentication for Critical Function</a></li>
+        <li><a href="bola-vs-bfla.html">BOLA vs BFLA</a></li>
+        <li><a href="credential-hygiene.html">Insufficient Credential Hygiene</a></li>
+
+        <!-- Race Conditions -->
+        <li><a href="business-logic.html">Business Logic Race Condition</a></li>
+
+        <!-- Misconfigurations -->
+        <li><a href="logging-monitoring.html">Insufficient Logging & Monitoring</a></li>
+        <li><a href="database.html">Database Misconfigurations</a></li>
+        <li><a href="integrity.html">Software and Integrity Failures</a></li>
+
+        <!-- Crypto -->
+        <li><a href="cryptography.html">Cryptography Issues</a></li>
+
+        <!-- Config Management -->
+        <li><a href="inventory.html">Improper Inventory / Config Management</a></li>
+
+        <!-- Memory/Runtime -->
+        <li><a href="use-after-free.html">Use After Free</a></li>
+        <li><a href="toc-tou.html">TOC/TOU</a></li>
+        <li><a href="null-pointer.html">Null Pointer Dereference</a></li>
+        <li><a href="buffer-overflow.html">Buffer Overflow</a></li>
       </ul>
     </div>
 
