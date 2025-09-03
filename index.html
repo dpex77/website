@@ -26,8 +26,20 @@ body {
   background: rgba(0, 102, 204, 0.85);
   text-align: left;
   color: white;
-  overflow-y: auto;        /* scroll if content too tall */
-  max-height: calc(100vh - 3rem); /* fit within grid row */
+  overflow-y: auto;
+  max-height: calc(100vh - 3rem);
+}
+
+/* Special styling for vulnerabilities card (2 columns) */
+.card.vulnerabilities {
+  column-count: 2;       /* split into 2 columns */
+  column-gap: 2rem;      /* space between columns */
+}
+
+.card.vulnerabilities h1,
+.card.vulnerabilities h2,
+.card.vulnerabilities h3 {
+  break-inside: avoid;   /* prevent headers from splitting across columns */
 }
 
 h1 {
@@ -40,7 +52,7 @@ ul { margin: 0 0 .8rem 1.2rem; padding-right: 0.5rem; }
 p { margin: .4rem 0; opacity: .95; }
 a { color: #ffdd57; text-decoration: none; }
 a:hover { text-decoration: underline; }
-</style>
+  </style>
 </head>
 <body>
 
@@ -64,7 +76,7 @@ a:hover { text-decoration: underline; }
   </div>
 
   <!-- Section 2 -->
-  <div class="card">
+  <div class="card vulnerabilities">
     <h1>Security Engineering</h1>
     <h2>Software Vulnerabilities</h2>
 
@@ -150,17 +162,4 @@ a:hover { text-decoration: underline; }
     <ul>
       <li><a href="weak-encryption.html">Weak or Broken Encryption</a></li>
       <li><a href="hardcoded-keys.html">Hardcoded Keys / Secrets</a></li>
-      <li><a href="insecure-algos.html">Use of Insecure Algorithms (MD5, SHA1)</a></li>
-      <li><a href="key-management.html">Improper Key Management</a></li>
-    </ul>
-
-    <h3>Configuration Management / Inventory</h3>
-    <ul>
-      <li><a href="asset-inventory.html">Improper Asset Inventory</a></li>
-      <li><a href="version-control.html">Missing Version Control for Configurations</a></li>
-      <li><a href="backup-storage.html">Misconfigured Backups or Storage</a></li>
-    </ul>
-  </div>
-
-</body>
-</html>
+      <li><a href="insecure-algos.html">
