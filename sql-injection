@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Injection</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+SQL Injection occurs when untrusted user input is incorporated into a SQL query without proper validation or sanitization, allowing an attacker to execute malicious SQL commands. It enables attackers to manipulate SQL queries to access, modify, or delete database data, escalate privileges, or bypass authentication.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers exploit queries that directly incorporate user input.  
+
+Scenario Example:  
+A website has a login page where users enter a username and password. The backend queries a MySQL database:  
+
+<code>SELECT * FROM users WHERE username = '{username}' AND password = '{password}';</code>
+
+The `users` table contains:
+
+id | username | password  
+1  | admin    | adminpass  
+2  | user1    | user1pass  
+
+If a legitimate user logs in:  
+
+<code>SELECT * FROM users WHERE username = 'admin' AND password = 'adminpass';</code>
+
+But an attacker can input:  
+
+username = '' OR 1=1 --  
+password = 'anything'  
+
+The resulting query:  
+
+<code>SELECT * FROM users WHERE username = '' OR 1=1 --' AND password = 'anything';</code>
+
+- `--` comments out the rest of the query.  
+- `OR 1=1` always evaluates to TRUE, bypassing authentication.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Target input fields like login forms, search bars, HTTP headers, or API endpoints.  
+- Craft malicious inputs to manipulate SQL queries (e.g., `' OR 1=1 --`).  
+- Retrieve all database rows, escalate privileges, or delete data.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- Unsanitized user input is the main vulnerability.  
+- Queries that concatenate user input with SQL statements are insecure.  
+- Lack of parameterization causes the database to interpret input as code.  
+- Absence of monitoring allows repeated attacks without detection.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions of a Defender:</h2>
+<b>Validate Input:</b>  
+- Reject dangerous characters like `'`, `--` or unexpected inputs.  
+- Ensure inputs match expected types (strings, integers).  
+
+<b>Use Parameterized Queries:</b>  
+<code>
+query = "SELECT * FROM users WHERE username = %s AND password = %s"  
+cursor.execute(query, (username, password))
+</code>
+- User input is treated as data, not SQL code.  
+- Injection attempts like `' OR 1=1 --` are safely interpreted as text.  
+
+<b>Prepared Statements:</b>  
+- Precompiled SQL queries enhance performance and security.  
+- Useful for repeated queries with different parameters.  
+
+<b>Web Application Firewall (WAF):</b>  
+- Detects and blocks SQL injection attempts.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- SQL Injection is one of the oldest and most dangerous web vulnerabilities.  
+- Exploit techniques: error-based, union-based, blind, or time-based.  
+- Regular testing, input validation, parameterization, and WAF deployment are key defenses.  
+- Modern frameworks provide built-in protection if used correctly.
+</div>
+
+</body>
+</html>
