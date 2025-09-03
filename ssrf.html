@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSRF</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Server-Side Request Forgery (SSRF) is a vulnerability where an attacker tricks a server into making requests on their behalf.  
+This can target internal systems or external services that the attacker cannot access directly.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+The web application accepts user-supplied URLs or resources (file fetch, image download, webhook, API call)  
+and the server performs the request without proper validation.  
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+<b>Attack Targets:</b>  
+
+- Internal Services: <code>http://localhost:8080</code>, internal APIs, Redis, Jenkins, etc.  
+- Private IP Ranges: <code>10.x.x.x</code>, <code>192.168.x.x</code>, <code>127.0.0.1</code>  
+- Cloud Metadata Services: AWS <code>http://169.254.169.254</code>, GCP, Azure  
+
+<b>Why SSRF is Dangerous:</b>  
+
+- Bypasses Firewalls – Internal services often trust requests from internal servers.  
+- Accesses Sensitive Internal Services – May reveal admin panels or internal APIs.  
+- Cloud Metadata Theft – Extracts credentials (IAM keys, tokens) from cloud services.  
+- Pivoting / Lateral Movement – Can scan internal networks or reach otherwise inaccessible systems.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- Server accepts user input and performs server-side HTTP requests without validation.  
+- Can expose internal services and sensitive endpoints.  
+- May lead to credential theft or network compromise if exploited.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Whitelist allowed domains/IPs and reject all others.  
+- Never directly use user input in server-side requests.  
+- Block internal IP ranges (127.0.0.1, 10.0.0.0/8, etc.).  
+- Network segmentation – Limit backend services’ access to internal networks.  
+- Monitor and log outgoing requests for suspicious patterns.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- SSRF can combine with other vulnerabilities (RCE, data exfiltration).  
+- Careful input validation and strict network policies are essential.  
+</div>
+
+</body>
+</html>
