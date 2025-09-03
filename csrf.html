@@ -36,55 +36,51 @@ code {
 <body>
 
 <div class="card">
-<h2>1. Overview / Scenario:</h2>
-An authenticated user is browsing a site and has a valid authentication cookie/session.
-
-An attacker tricks the user into performing an action (e.g., clicking a malicious link, visiting a crafted page via phishing or XSS). This redirects or triggers requests to a legitimate site where the user is authenticated.
-
-The attacker doesn’t need the user’s password.
-
+<h2>1. Overview:</h2>
+CSRF (Cross-Site Request Forgery) occurs when an authenticated user is tricked into performing actions on a site where they are logged in, without their knowledge.  
+The attacker does not need the user’s password.  
 CSRF exploits the fact that the server trusts requests from the authenticated client.
 </div>
 
 <div class="card">
-<h2>2. Why it works:</h2>
-<b>Active session:</b> The user is already logged in; the browser sends the authentication cookie automatically.
-
-<b>Same-Origin Policy (SOP):</b>  
-Browsers restrict scripts from one origin from reading data on another origin.  
-
-<b>Limitation:</b> SOP does not prevent the browser from sending cookies with legitimate requests to the target domain.
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+- Active session: The user is already logged in; the browser automatically sends authentication cookies.  
+- Same-Origin Policy (SOP) limitation: Browsers prevent scripts from reading data across origins, but they still send cookies with legitimate requests to the target domain.
 </div>
 
 <div class="card">
-<h2>3. Mitigations:</h2>
-
-<b>1. Cookie-based mitigations:</b>  
-
-<b>SameSite Attribute:</b> Controls when cookies are sent in cross-site requests:  
-
-- SameSite=Strict: Cookies are sent only for requests from the same origin.  
-- SameSite=Lax: Cookies are sent for top-level navigations but not for embedded requests (like images or iframes).  
-- SameSite=None: Cookies are sent with all requests but must be marked Secure (HTTPS only).  
-
-Purpose: Limits automatic cookie sending in cross-origin requests.
+<h2>2.1 Attempts of an Attacker:</h2>
+- Tricking the user into clicking malicious links  
+- Phishing emails redirecting the user to crafted pages  
+- Using XSS to automatically trigger requests from the authenticated client
 </div>
 
 <div class="card">
-<h2>4. CSRF Tokens:</h2>
-<b>Definition:</b> Unique, unpredictable token issued per user session (or per request).
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- Servers must not trust requests solely because they carry valid authentication cookies.  
+- Every state-changing request should include a mechanism to verify the legitimacy of the request (e.g., CSRF tokens).  
+- Use cookie attributes like SameSite to restrict automatic cookie sending.
+</div>
 
-<b>How it works:</b>  
-1. Server generates a CSRF token and associates it with the user’s session.  
-2. Token is sent to the client via:  
-   - Hidden HTML form fields  
-   - HTTP headers for AJAX requests (e.g., X-CSRF-Token)  
-3. When the client submits a request, the server verifies that the token matches the session-stored value.  
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+1. <b>Cookie-based mitigations:</b>  
+- SameSite=Strict: Cookies sent only for same-origin requests.  
+- SameSite=Lax: Cookies sent for top-level navigations, not embedded requests.  
+- SameSite=None: Cookies sent for all requests but must be Secure (HTTPS).  
 
-<b>Key points:</b>  
-- Tokens are unique and unpredictable.  
-- Tokens expire after some time.  
-- Tokens ensure that only legitimate requests from the authenticated user are accepted.
+2. <b>CSRF Tokens:</b>  
+- Unique, unpredictable token issued per session or request.  
+- Sent via hidden HTML form fields or AJAX headers (e.g., X-CSRF-Token).  
+- Server verifies token matches session-stored value.  
+- Tokens expire and ensure only legitimate requests are accepted.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- CSRF is a trust-based attack: the server trusts the client.  
+- Effective mitigation combines SameSite cookies, CSRF tokens, and user interaction verification.  
+- Monitoring unexpected state-changing requests can help detect attempted attacks.
 </div>
 
 </body>
