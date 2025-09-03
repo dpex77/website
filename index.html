@@ -50,10 +50,16 @@
       color: #fff;
     }
 
-    .memory { background: #ff7043; }        /* orange */
-    .misconfig { background: #42a5f5; }     /* blue */
-    .crypto { background: #66bb6a; }        /* green */
-    .config { background: #ab47bc; }        /* purple */
+    .inject { background: #ef5350; }      /* red */
+    .dos { background: #8e24aa; }         /* purple */
+    .web { background: #29b6f6; }         /* light blue */
+    .session { background: #66bb6a; }     /* green */
+    .auth { background: #ffb300; }        /* amber */
+    .race { background: #5c6bc0; }        /* indigo */
+    .memory { background: #ff7043; }      /* orange */
+    .misconfig { background: #42a5f5; }   /* blue */
+    .crypto { background: #26a69a; }      /* teal */
+    .config { background: #ab47bc; }      /* deep purple */
 
     ul {
       list-style: none;
@@ -86,41 +92,89 @@
     <div class="card">
       <h2>Software/Network Vulnerabilities</h2>
 
-      <!-- Memory and Buffer Issues -->
-      <div class="section-title memory">7. Memory and Buffer Issues</div>
+      <div class="section-title inject">1. Injection-related Vulnerabilities</div>
       <ul>
+        <li><a href="code-injection.html">Code Injection</a></li>
+        <li><a href="command-injection.html">Command Injection</a></li>
+        <li><a href="sql-injection.html">SQL Injection</a></li>
+        <li><a href="format-string.html">Format String Vulnerability</a></li>
+        <li><a href="http-header-injection.html">HTTP Header Injection</a></li>
+        <li><a href="log-injection.html">Log Injection Attacks</a></li>
+        <li><a href="file-upload.html">Unrestricted File Upload / Arbitrary File Upload</a></li>
+      </ul>
+
+      <div class="section-title dos">2. Denial of Service (DoS)</div>
+      <ul>
+        <li><a href="syn-flood.html">SYN Flood</a></li>
+        <li><a href="http-flood.html">HTTP Flood / Application DoS</a></li>
+        <li><a href="resource-exhaustion.html">Resource Exhaustion (CPU, Memory, Disk)</a></li>
+      </ul>
+
+      <div class="section-title web">3. Web Security Vulnerabilities</div>
+      <ul>
+        <li><a href="csrf.html">Cross-Site Request Forgery (CSRF)</a></li>
+        <li><a href="xss.html">Cross-Site Scripting (XSS)</a></li>
+        <li><a href="ssrf.html">Server-Side Request Forgery (SSRF)</a></li>
+        <li><a href="clickjacking.html">Clickjacking</a></li>
+        <li><a href="cors.html">CORS Misconfiguration</a></li>
+      </ul>
+
+      <div class="section-title session">4. Session Management Vulnerabilities</div>
+      <ul>
+        <li><a href="session-fixation.html">Session Fixation</a></li>
+        <li><a href="session-hijacking.html">Session Hijacking</a></li>
+        <li><a href="insecure-cookies.html">Insecure Cookie Attributes</a></li>
+        <li><a href="session-expiration.html">Inadequate Session Expiration / Logout</a></li>
+      </ul>
+
+      <div class="section-title auth">5. Authentication & Authorization Vulnerabilities</div>
+      <ul>
+        <li><a href="bac.html">Broken Access Control (BAC)</a></li>
+        <li><a href="privilege-escalation.html">Privilege Escalation (IDOR)</a></li>
+        <li><a href="oauth-attacks.html">Attacks Against OAuth / SSO</a></li>
+        <li><a href="insufficient-credentials.html">Insufficient Credential Protection</a></li>
+        <li><a href="error-handling.html">Error Handling Leaks</a></li>
+        <li><a href="missing-auth.html">Missing Authentication for Critical Functions</a></li>
+        <li><a href="bola-vs-bfla.html">BOLA vs BFLA</a></li>
+        <li><a href="credential-hygiene.html">Insufficient Credential Hygiene</a></li>
+      </ul>
+
+      <div class="section-title race">6. Race Conditions / Concurrency Issues</div>
+      <ul>
+        <li><a href="business-logic-race.html">Business Logic Race Conditions</a></li>
         <li><a href="toc-tou.html">TOC/TOU (Time of Check / Time of Use)</a></li>
         <li><a href="use-after-free.html">Use-After-Free</a></li>
         <li><a href="null-pointer.html">Null Pointer Dereference</a></li>
-        <li><a href="buffer-overflow.html">Buffer Overflow</a></li>
-        <li><a href="#">Stack / Heap Corruption</a></li>
-        <li><a href="format-string.html">Format String Exploits</a></li>
       </ul>
 
-      <!-- Security Misconfigurations -->
+      <div class="section-title memory">7. Memory and Buffer Issues</div>
+      <ul>
+        <li><a href="buffer-overflow.html">Buffer Overflow</a></li>
+        <li><a href="stack-heap-corruption.html">Stack / Heap Corruption</a></li>
+        <li><a href="format-string-exploits.html">Format String Exploits (C)</a></li>
+      </ul>
+
       <div class="section-title misconfig">8. Security Misconfigurations</div>
       <ul>
         <li><a href="logging-monitoring.html">Insufficient Logging & Monitoring</a></li>
-        <li><a href="database.html">Database Misconfiguration</a></li>
-        <li><a href="integrity.html">Software Integrity Failures / Unpatched Software</a></li>
-        <li><a href="#">Improper Server Configurations</a></li>
+        <li><a href="database-misconfig.html">Database Misconfiguration</a></li>
+        <li><a href="software-integrity.html">Software Integrity Failures / Unpatched Software</a></li>
+        <li><a href="server-config.html">Improper Server Configurations</a></li>
       </ul>
 
-      <!-- Cryptography Issues -->
       <div class="section-title crypto">9. Cryptography-related Vulnerabilities</div>
       <ul>
-        <li><a href="cryptography.html">Weak or Broken Encryption</a></li>
-        <li><a href="#">Hardcoded Keys / Secrets</a></li>
-        <li><a href="#">Use of Insecure Algorithms (MD5, SHA1)</a></li>
-        <li><a href="#">Improper Key Management</a></li>
+        <li><a href="weak-encryption.html">Weak or Broken Encryption</a></li>
+        <li><a href="hardcoded-keys.html">Hardcoded Keys / Secrets</a></li>
+        <li><a href="insecure-algos.html">Use of Insecure Algorithms (MD5, SHA1)</a></li>
+        <li><a href="key-management.html">Improper Key Management</a></li>
       </ul>
 
-      <!-- Configuration Management -->
       <div class="section-title config">10. Configuration Management / Inventory Issues</div>
       <ul>
-        <li><a href="inventory.html">Improper Asset Inventory</a></li>
-        <li><a href="#">Missing Version Control for Configurations</a></li>
-        <li><a href="#">Misconfigured Backups or Storage</a></li>
+        <li><a href="asset-inventory.html">Improper Asset Inventory</a></li>
+        <li><a href="version-control.html">Missing Version Control for Configurations</a></li>
+        <li><a href="backup-storage.html">Misconfigured Backups or Storage</a></li>
       </ul>
     </div>
 
@@ -149,10 +203,20 @@
     <!-- Card 3: Self -->
     <div class="card">
       <h2>Self</h2>
+      <p>Systems packet level dissection to application level code.</p>
+      <p>MS in Cybersecurity.</p>
+      <h3>Certifications</h3>
       <ul>
-        <li>✨ Your personal notes or goals here</li>
-        <li>✨ Keep existing "self" contents</li>
+        <li>CISSP</li>
+        <li>CCSP</li>
+        <li>CISA</li>
+        <li>AWS Security</li>
+        <li>RHCE</li>
+        <li>CCNP</li>
+        <li>ITIL</li>
       </ul>
+      <h3>Languages</h3>
+      <p>Bash, Python, Go</p>
     </div>
 
   </div>
