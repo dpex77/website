@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XSS (Cross-Site Scripting)</title>
+<title>XSS</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -37,7 +37,8 @@ code {
 
 <div class="card">
 <h2>1. Overview:</h2>
-Cross-Site Scripting (XSS) is a vulnerability that allows attackers to inject malicious scripts into web pages viewed by others. Once executed in a victim’s browser, these scripts can:
+XSS (Cross-Site Scripting) is a vulnerability that allows attackers to inject malicious scripts into web pages viewed by others.  
+Once executed in a victim’s browser, these scripts can:  
 
 - Steal cookies or session tokens  
 - Redirect users to malicious sites  
@@ -48,56 +49,53 @@ Cross-Site Scripting (XSS) is a vulnerability that allows attackers to inject ma
 <div class="card">
 <h2>2. Vulnerability from an Attacker Perspective:</h2>
 XSS occurs when user input is not properly sanitized or encoded, allowing scripts such as:  
-<code>&lt;script&gt;malicious_code&lt;/script&gt;</code> to run directly in the browser.
+
+<code>&lt;!-- &lt;script&gt;malicious_code&lt;/script&gt; --&gt;</code>  
+
+to run directly in the browser.
 </div>
 
 <div class="card">
-<h2>2.1 Attempts of an Attacker:</h2>
-Types of XSS:
+<h2>2.1 Types of XSS / Attempts of an Attacker:</h2>
+<b>Reflected XSS:</b>  
+- Payload embedded in a crafted link or request.  
+- Server reflects the payload in response without storing it.  
+- Requires user interaction: attacker tricks victim into clicking link.  
 
-<b>Reflected XSS</b>  
-- The payload is embedded in a crafted link or request.  
-- The server reflects this payload in its response without storing it.  
-- Attackers trick victims into clicking the malicious link (via email, social media, phishing, etc.).  
-- Key point: requires user interaction.
+<b>Stored XSS:</b>  
+- Payload saved on the server (comment boxes, profile fields, forum posts, chat).  
+- Example: <code>&lt;!-- &lt;script&gt;alert('Hacked!')&lt;/script&gt; --&gt;</code>  
+- No attacker interaction needed after payload stored.  
 
-<b>Stored XSS</b>  
-- The payload is saved on the server (e.g., in comment boxes, profile fields, forum posts, chat messages).  
-- Example: <code>&lt;script&gt;alert('Hacked!')&lt;/script&gt;</code>  
-- If unsanitized, every user who views the page triggers the script.  
-- Key point: no attacker interaction is needed after the payload is stored—making this more dangerous.
-
-<b>DOM-Based XSS</b>  
-- The vulnerability exists entirely in client-side JavaScript.  
-- The server may never see the malicious input.  
-- Example: <code>document.getElementById('output').innerHTML = location.hash;</code>  
-- When a user visits a URL with a malicious fragment (e.g., #<script>alert('XSS')</script>), the script executes in their browser.  
-- Key point: purely client-side, triggered by unsafe DOM manipulation.
+<b>DOM-Based XSS:</b>  
+- Vulnerability exists entirely in client-side JavaScript.  
+- Example: 
+<code>document.getElementById('output').textContent = location.hash;</code>  
+- Unsafe example commented: <code>&lt;!-- &lt;script&gt;alert('XSS')&lt;/script&gt; --&gt;</code>  
+- Triggered purely by unsafe DOM manipulation.
 </div>
 
 <div class="card">
 <h2>3. Vulnerability from a Defender Perspective:</h2>
-- Input validation: Reject or filter dangerous inputs (<, >, <script>).  
-- Output encoding: Encode user data before rendering it in HTML, JavaScript, or URLs.  
-- Content Security Policy (CSP): Restrict which scripts can execute on the page.  
-- HTTP-only cookies: Prevent JavaScript from accessing sensitive session data.  
-- Safe DOM handling: Avoid inserting untrusted data directly into innerHTML; use textContent or safe templating libraries.
+- Input is not validated or sanitized.  
+- User-provided content is inserted into page without encoding.  
+- Scripts execute in other users’ browsers, potentially stealing data or performing actions.
 </div>
 
 <div class="card">
 <h2>3.1 Solutions for a Defender:</h2>
-- Validate all user inputs and sanitize outputs.  
-- Apply strict CSP headers.  
-- Encode outputs in the appropriate context (HTML, JS, URL).  
-- Set HTTP-only flags for cookies to prevent access via JS.  
-- Use safe templating methods to handle dynamic content.
+- <b>Input Validation:</b> Reject or filter dangerous inputs (&lt;, &gt;, &lt;script&gt;).  
+- <b>Output Encoding:</b> Encode user data before rendering in HTML, JS, or URLs.  
+- <b>Content Security Policy (CSP):</b> Restrict which scripts can execute.  
+- <b>HTTP-only Cookies:</b> Prevent JavaScript from accessing session data.  
+- <b>Safe DOM Handling:</b> Avoid inserting untrusted data into innerHTML; use textContent or safe templating libraries.
 </div>
 
 <div class="card">
 <h2>4. Extras:</h2>
-- XSS is dangerous because it runs in the victim’s browser context.  
-- Stored XSS is typically more severe than reflected XSS.  
-- DOM-based XSS requires understanding of client-side JavaScript behavior.
+- XSS attacks rely on the victim executing attacker-supplied scripts.  
+- Stored XSS is more dangerous than reflected XSS due to persistence.  
+- DOM-based XSS can occur without server-side vulnerabilities, purely via unsafe client-side code.
 </div>
 
 </body>
