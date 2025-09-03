@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORS Misconfiguration</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Cross-Origin Resource Sharing (CORS) is a mechanism that allows web applications to request resources from a different origin. A misconfigured CORS policy can allow malicious websites to access sensitive resources on your server.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers can exploit CORS misconfigurations to:  
+
+- Read sensitive data from another origin.  
+- Perform unauthorized actions if the user is authenticated.  
+- Exploit the trust relationship between a browser and the target server.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Crafting a malicious website that makes cross-origin requests.  
+- Exploiting overly permissive CORS headers such as <code>Access-Control-Allow-Origin: *</code>.  
+- Using tools like Burp Suite to test CORS origin bypasses.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- Allowing <code>*</code> as the allowed origin for sensitive endpoints.  
+- Reflecting the <code>Origin</code> header blindly in <code>Access-Control-Allow-Origin</code>.  
+- Not validating the request method or headers in cross-origin requests.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions of a Defender:</h2>
+- Restrict <code>Access-Control-Allow-Origin</code> to trusted domains only.  
+- Validate <code>Origin</code> header against an allowlist on the server side.  
+- Ensure sensitive endpoints require proper authentication and authorization.  
+- Use proper CORS headers like <code>Access-Control-Allow-Methods</code> and <code>Access-Control-Allow-Headers</code> to restrict allowed actions.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Misconfigured CORS often occurs when developers want to allow legitimate cross-origin requests but leave the configuration too permissive.  
+- Regularly test your web applications for CORS vulnerabilities using browser developer tools or security testing tools.
+</div>
+
+</body>
+</html>
