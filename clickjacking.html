@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clickjacking</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Clickjacking is a vulnerability where an attacker tricks a user into clicking on something different from what the user perceives, potentially revealing confidential information or allowing unintended actions. It usually involves embedding a website or interface in a transparent or opaque iframe.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers can exploit clickjacking to:  
+
+- Hijack clicks intended for legitimate interface elements.  
+- Trigger actions like fund transfers, password changes, or account deletion.  
+- Steal sensitive information or perform actions on behalf of the user without consent.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Overlaying a transparent iframe over a trusted website’s button.  
+- Luring the user to a malicious page with disguised controls.  
+- Using social engineering to convince the user to interact with hidden elements.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+- Allowing the website to be embedded in iframes without restriction.  
+- Lack of frame-busting or anti-clickjacking headers.  
+- No validation of the source of requests or user interactions.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions of a Defender:</h2>
+<b>Use X-Frame-Options Header:</b>  
+- <code>X-Frame-Options: DENY</code> → prevents all framing.  
+- <code>X-Frame-Options: SAMEORIGIN</code> → allows framing only from the same origin.
+
+<b>Content Security Policy (CSP) Frame-Ancestors Directive:</b>  
+- Example: <code>Content-Security-Policy: frame-ancestors 'self'</code>  
+- Defines which origins can embed the content in frames.
+
+<b>UI Hardening:</b>  
+- Avoid placing critical clickable elements at predictable positions that could be targeted by clickjacking.  
+- Confirm sensitive actions through secondary prompts or CAPTCHAs.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Clickjacking can be combined with other attacks like CSRF for more impactful exploits.  
+- Always test your web application by trying to embed it in a malicious iframe during security assessments.  
+- Keep headers and UI validation up to date for robust defense.
+</div>
+
+</body>
+</html>
