@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSRF</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview / Scenario:</h2>
+An authenticated user is browsing a site and has a valid authentication cookie/session.
+
+An attacker tricks the user into performing an action (e.g., clicking a malicious link, visiting a crafted page via phishing or XSS). This redirects or triggers requests to a legitimate site where the user is authenticated.
+
+The attacker doesn’t need the user’s password.
+
+CSRF exploits the fact that the server trusts requests from the authenticated client.
+</div>
+
+<div class="card">
+<h2>2. Why it works:</h2>
+<b>Active session:</b> The user is already logged in; the browser sends the authentication cookie automatically.
+
+<b>Same-Origin Policy (SOP):</b>  
+Browsers restrict scripts from one origin from reading data on another origin.  
+
+<b>Limitation:</b> SOP does not prevent the browser from sending cookies with legitimate requests to the target domain.
+</div>
+
+<div class="card">
+<h2>3. Mitigations:</h2>
+
+<b>1. Cookie-based mitigations:</b>  
+
+<b>SameSite Attribute:</b> Controls when cookies are sent in cross-site requests:  
+
+- SameSite=Strict: Cookies are sent only for requests from the same origin.  
+- SameSite=Lax: Cookies are sent for top-level navigations but not for embedded requests (like images or iframes).  
+- SameSite=None: Cookies are sent with all requests but must be marked Secure (HTTPS only).  
+
+Purpose: Limits automatic cookie sending in cross-origin requests.
+</div>
+
+<div class="card">
+<h2>4. CSRF Tokens:</h2>
+<b>Definition:</b> Unique, unpredictable token issued per user session (or per request).
+
+<b>How it works:</b>  
+1. Server generates a CSRF token and associates it with the user’s session.  
+2. Token is sent to the client via:  
+   - Hidden HTML form fields  
+   - HTTP headers for AJAX requests (e.g., X-CSRF-Token)  
+3. When the client submits a request, the server verifies that the token matches the session-stored value.  
+
+<b>Key points:</b>  
+- Tokens are unique and unpredictable.  
+- Tokens expire after some time.  
+- Tokens ensure that only legitimate requests from the authenticated user are accepted.
+</div>
+
+</body>
+</html>
