@@ -1,165 +1,118 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Welcome — My Website</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vulnerabilities & Security</title>
   <style>
-body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  min-height: 100vh;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr 1fr; /* 2 rows, same height */
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: url('cloud.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: #0b1a2b;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
 
-.card {
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(11,26,43,0.15);
-  background: rgba(0, 102, 204, 0.85);
-  text-align: left;
-  color: white;
-  overflow-y: auto;
-  max-height: calc(100vh - 3rem);
-}
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-/* Special styling for vulnerabilities card (2 columns) */
-.card.vulnerabilities {
-  column-count: 2;       /* split into 2 columns */
-  column-gap: 2rem;      /* space between columns */
-}
+    .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
 
-.card.vulnerabilities h1,
-.card.vulnerabilities h2,
-.card.vulnerabilities h3 {
-  break-inside: avoid;   /* prevent headers from splitting across columns */
-}
+    .card {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
 
-h1 {
-  margin: 0 0 .5rem;
-  font-size: 1.2rem;
-}
-h2 { margin: .8rem 0 .3rem; font-size: 1rem; }
-h3 { margin: .6rem 0 .2rem; font-size: 0.9rem; }
-ul { margin: 0 0 .8rem 1.2rem; padding-right: 0.5rem; }
-p { margin: .4rem 0; opacity: .95; }
-a { color: #ffdd57; text-decoration: none; }
-a:hover { text-decoration: underline; }
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin: 8px 0;
+      padding: 6px 8px;
+      background: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007BFF;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
+  <h1>Security Overview</h1>
+  <div class="container">
 
-  <!-- Section 1 -->
-  <div class="card">
-    <h1>Self</h1>
-    <p>Systems packet level dissection to application level code.</p>
-    <p>MS in Cybersecurity.</p>
-    <h2>Certifications</h2>
-    <ul>
-      <li>CISSP</li>
-      <li>CCSP</li>
-      <li>CISA</li>
-      <li>AWS Security</li>
-      <li>RHCE</li>
-      <li>CCNP</li>
-      <li>ITIL</li>
-    </ul>
-    <h2>Languages</h2>
-    <p>Bash, Python, Go</p>
+    <!-- Card 1: Software/Network Vulnerabilities -->
+    <div class="card">
+      <h2>Software/Network Vulnerabilities</h2>
+      <ul>
+        <li>Injection related: Code Injection, Command Injection, SQL, Format String, HTTP Injection, Log Injection, Unrestricted File Upload</li>
+        <li>DoS related: SYN Flood</li>
+        <li>Web Security: CSRF, XSS, SSRF, Clickjacking, CORS</li>
+        <li>Session Management related</li>
+        <li>Authentication Related: Broken Access Control, Privilege Escalation (IDOR), Attacks Against OAuth, Insufficiently Protected Credentials, Error Handling, Missing Authentication for Critical Function, BOLA vs BFLA, Insufficient Credential Hygiene</li>
+        <li>Race Conditions: Business Logic</li>
+        <li>Security Misconfigurations: Insufficient Logging & Monitoring, Database, Software and Integrity Failures</li>
+        <li>Cryptography</li>
+        <li>Configuration Management: Improper Inventory</li>
+        <li>Memory/Runtime Issues: Use After Free, TOC/TOU, Null Pointer Dereference, Buffer Overflow</li>
+      </ul>
+    </div>
+
+    <!-- Card 2: Security Engineering -->
+    <div class="card">
+      <h2>Security Engineering</h2>
+      <ul>
+        <li><a href="#">Bruteforce an application port to exhaust it</a></li>
+        <li><a href="#">Running Multiple DAST tools together and export in Defect Dojo</a></li>
+        <li><a href="#">Automating SAST scanning</a></li>
+        <li><a href="#">Login to website from UI (GraphQL) and upload files</a></li>
+        <li><a href="#">Login to SSH server and get data and plot</a></li>
+        <li><a href="#">Parsing log files to deduce something</a></li>
+        <li><a href="#">API Parsing</a></li>
+        <li><a href="#">Bruteforce SSH logins</a></li>
+        <li><a href="#">Website Requests/Responses security headers</a></li>
+        <li><a href="#">Socket Programming</a></li>
+        <li><a href="#">Web Scraping a PDF file (RedHat 8)</a></li>
+        <li><a href="#">Port Scanner</a></li>
+        <li><a href="#">Craft packets</a></li>
+        <li><a href="#">Regex</a></li>
+        <li><a href="#">AWS resources creation</a></li>
+      </ul>
+    </div>
+
+    <!-- Card 3: Self -->
+    <div class="card">
+      <h2>Self</h2>
+      <ul>
+        <li>✨ Your personal notes or goals here</li>
+        <li>✨ Keep existing "self" contents</li>
+      </ul>
+    </div>
+
   </div>
-
-  <!-- Section 2 -->
-  <div class="card vulnerabilities">
-    <h1>Security Engineering</h1>
-    <h2>Software Vulnerabilities</h2>
-
-    <h3>Injection-related Vulnerabilities</h3>
-    <ul>
-      <li><a href="code-injection.html">Code Injection</a></li>
-      <li><a href="command-injection.html">Command Injection</a></li>
-      <li><a href="sql-injection.html">SQL Injection</a></li>
-      <li><a href="format-string.html">Format String Vulnerability</a></li>
-      <li><a href="http-header-injection.html">HTTP Header Injection</a></li>
-      <li><a href="log-injection.html">Log Injection Attacks</a></li>
-      <li><a href="file-upload.html">Unrestricted / Arbitrary File Upload</a></li>
-    </ul>
-
-    <h3>Denial of Service (DoS)</h3>
-    <ul>
-      <li><a href="syn-flood.html">SYN Flood</a></li>
-      <li><a href="http-flood.html">HTTP Flood / Application DoS</a></li>
-      <li><a href="resource-exhaustion.html">Resource Exhaustion (CPU, Memory, Disk)</a></li>
-    </ul>
-
-    <h3>Web Security Vulnerabilities</h3>
-    <ul>
-      <li><a href="csrf.html">Cross-Site Request Forgery (CSRF)</a></li>
-      <li><a href="xss.html">Cross-Site Scripting (XSS)</a></li>
-      <li><a href="ssrf.html">Server-Side Request Forgery (SSRF)</a></li>
-      <li><a href="clickjacking.html">Clickjacking</a></li>
-      <li><a href="cors.html">CORS Misconfiguration</a></li>
-    </ul>
-
-    <h3>Session Management</h3>
-    <ul>
-      <li><a href="session-fixation.html">Session Fixation</a></li>
-      <li><a href="session-hijacking.html">Session Hijacking</a></li>
-      <li><a href="insecure-cookies.html">Insecure Cookie Attributes</a></li>
-      <li><a href="session-expiration.html">Inadequate Session Expiration / Logout</a></li>
-    </ul>
-
-    <h3>Authentication & Authorization</h3>
-    <ul>
-      <li><a href="bac.html">Broken Access Control (BAC)</a></li>
-      <li><a href="privilege-escalation.html">Privilege Escalation / IDOR</a></li>
-      <li><a href="oauth-attacks.html">Attacks Against OAuth / SSO</a></li>
-      <li><a href="insufficient-credentials.html">Insufficient Credential Protection</a></li>
-      <li><a href="error-handling.html">Error Handling Leaks</a></li>
-      <li><a href="missing-auth.html">Missing Authentication for Critical Functions</a></li>
-      <li><a href="bola-vs-bfla.html">BOLA vs BFLA</a></li>
-      <li><a href="credential-hygiene.html">Insufficient Credential Hygiene</a></li>
-    </ul>
-  </div>
-
-  <!-- Section 3 -->
-  <div class="card">
-    <h1>System Engineering & Race Conditions</h1>
-    <h3>Race Conditions / Concurrency</h3>
-    <ul>
-      <li><a href="business-logic-race.html">Business Logic Race Conditions</a></li>
-      <li><a href="toc-tou.html">TOC/TOU (Time of Check / Time of Use)</a></li>
-      <li><a href="use-after-free.html">Use-After-Free</a></li>
-      <li><a href="null-pointer.html">Null Pointer Dereference</a></li>
-    </ul>
-
-    <h3>Memory & Buffer Issues</h3>
-    <ul>
-      <li><a href="buffer-overflow.html">Buffer Overflow</a></li>
-      <li><a href="stack-heap-corruption.html">Stack / Heap Corruption</a></li>
-      <li><a href="format-string-exploits.html">Format String Exploits (C)</a></li>
-    </ul>
-
-    <h3>Security Misconfigurations</h3>
-    <ul>
-      <li><a href="logging-monitoring.html">Insufficient Logging & Monitoring</a></li>
-      <li><a href="database-misconfig.html">Database Misconfiguration</a></li>
-      <li><a href="software-integrity.html">Software Integrity Failures / Unpatched Software</a></li>
-      <li><a href="server-config.html">Improper Server Configurations</a></li>
-    </ul>
-  </div>
-
-  <!-- Section 4 -->
-  <div class="card">
-    <h1>Cryptography & Config Management</h1>
-    <h3>Cryptography</h3>
-    <ul>
-      <li><a href="weak-encryption.html">Weak or Broken Encryption</a></li>
-      <li><a href="hardcoded-keys.html">Hardcoded Keys / Secrets</a></li>
-      <li><a href="insecure-algos.html">
+</body>
+</html>
