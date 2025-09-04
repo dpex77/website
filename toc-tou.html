@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Condition / TOCTOU</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+A race condition occurs when a system's behavior depends on the timing of events, such as checks and usage of a resource. 
+TOCTOU (Time-of-Check to Time-of-Use) is a specific type where a system validates a condition and later uses the resource, assuming the state hasn't changed. 
+If an attacker manipulates the state between check and use, unintended access or modifications can occur.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers can exploit timing gaps to gain unauthorized access, overwrite files, or escalate privileges:
+
+<b>File Race / Symlink Attack:</b>
+- Program checks /tmp/file.txt exists
+- Attacker replaces it with a symlink to /etc/passwd
+- Program unknowingly reads/writes /etc/passwd
+
+<b>Session / Token Race:</b>
+- System checks a session or token
+- Attacker alters or reuses it before use
+- Gains unauthorized access
+
+<b>SetUID Binaries:</b>
+- Root-owned binaries executed by normal users
+- Attacker replaces temporary resources before execution
+- Gains elevated privileges
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Monitor or race system checks (file existence, permissions)
+- Replace, modify, or swap resources (files, symlinks, temp paths) between check and use
+- Exploit shared temporary directories (/tmp)
+- Exploit SetUID binaries by injecting paths or files before execution
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Race conditions and TOCTOU issues arise from:
+- Checking conditions and using resources separately
+- Shared resources without proper locking
+- Insecure temporary file handling
+- Privileged operations relying on unchecked assumptions
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Use atomic operations (e.g., open with O_CREAT | O_EXCL in POSIX)
+- Avoid using temporary files in shared directories (/tmp) or use secure tmp handling (mkstemp)
+- Use file descriptors instead of paths where possible
+- Apply proper privilege separation: drop unnecessary privileges before resource usage
+- Implement locks or checks at the time of use, not only prior checks
+- Audit and review privileged code paths for TOCTOU risks
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- TOCTOU vulnerabilities are often subtle and hard to detect in testing
+- They can lead to sensitive data exposure, privilege escalation, or system compromise
+- Proper OS-level primitives and secure programming practices are key to mitigation
+- Testing with deliberate timing attacks can help identify these flaws
+</div>
+
+</body>
+</html>
