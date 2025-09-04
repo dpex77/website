@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Error Handling Leaks</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Error handling leaks occur when applications expose sensitive information through error messages or stack traces.  
+This information can include database schemas, file paths, server software versions, or even authentication details.  
+Attackers can use these leaks to plan further attacks, such as SQL injection, directory traversal, or privilege escalation.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s view, error handling leaks provide reconnaissance opportunities and reduce the effort needed for exploitation.
+
+<b>1. Information Disclosure:</b>  
+- Full stack traces reveal frameworks, library versions, file paths, and line numbers.  
+- SQL errors expose table names, columns, and sometimes data.  
+- Configuration or environment info may indicate cloud providers, server OS, or internal endpoints.
+
+<b>2. Attack Facilitation:</b>  
+- SQL Injection: Knowing exact column names or query structure helps craft payloads.  
+- Directory Traversal: File path disclosures help locate sensitive files.  
+- Authentication Bypass: Error messages may reveal valid usernames or account status.  
+
+<b>3. Reconnaissance:</b>  
+- Version numbers allow attackers to check known CVEs for specific software.  
+- Internal IPs or hostnames may be leaked for lateral movement.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Trigger intentional errors by providing invalid input (e.g., special characters, invalid endpoints).  
+- Observe returned stack traces or verbose messages.  
+- Capture server responses to extract sensitive details.  
+- Use the leaked info to craft specific attacks, such as targeting unpatched software versions or database tables.  
+- Automated scanners can enumerate endpoints and test for verbose error leaks.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Defenders must recognize that exposing internal error details can drastically increase the attack surface.  
+
+Common mistakes include:  
+- Showing raw stack traces in production.  
+- Including sensitive info in exception messages (DB credentials, API keys, server paths).  
+- Logging errors publicly (e.g., in API responses or UI messages).  
+- Revealing whether a username exists via authentication errors.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+<b>1. General Best Practices:</b>  
+- Disable verbose error messages in production.  
+- Use generic messages like “An error occurred. Please try again.”  
+- Never reveal stack traces or system details to end users.  
+
+<b>2. Logging:</b>  
+- Log full error details internally for debugging purposes.  
+- Ensure logs are stored securely with access controls.  
+- Separate logs from end-user display.
+
+<b>3. Input Validation:</b>  
+- Validate and sanitize all inputs to reduce unhandled exceptions.  
+
+<b>4. Monitoring:</b>  
+- Implement alerting for repeated errors or unusual patterns.  
+- Monitor logs for suspicious attempts to trigger errors.  
+
+<b>5. Authentication & Authorization:</b>  
+- Use generic messages on login failures to avoid revealing valid usernames.  
+- Avoid differentiating messages between incorrect password and non-existent accounts.
+
+<b>Example:</b>  
+<code>
+# Unsafe
+try:
+    user = db.get_user(username)
+except Exception as e:
+    return str(e)  # Reveals SQL error or stack trace
+
+# Safe
+try:
+    user = db.get_user(username)
+except Exception:
+    return "An error occurred. Please try again."
+</code>
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Error handling leaks are often combined with other vulnerabilities to escalate attacks.  
+- Automated security tools can detect verbose error messages and stack traces.  
+- Consistent, secure error handling is part of OWASP Top 10 recommendations.  
+- Educate developers to separate user-facing messages from debug logs.
+</div>
+
+</body>
+</html>
