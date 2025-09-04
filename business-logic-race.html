@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Logic Flaws</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Business logic flaws occur when an application's intended workflow or rules can be abused. 
+These are not technical vulnerabilities like code injection but arise from misaligned or unenforced business rules.
+
+<b>Causes:</b>
+- Developers assume users follow the rules.
+- Lack of backend enforcement; relying only on client-side validation.
+- Trusting client-side data (timestamps, prices, balances).
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers exploit business logic flaws to manipulate intended workflows:
+
+<b>Early Bird Discount Abuse:</b>
+Rule: 10% discount before June 1st
+Attack: Intercept request and modify date
+Vulnerability: Server trusts client-side date
+
+<b>Order Cancellation After Shipping:</b>
+Rule: Cancel only before shipping
+Attack: Forged cancel request after shipment
+Vulnerability: Server does not enforce workflow
+
+<b>Reward Points Abuse:</b>
+Rule: Points deducted when redeemed
+Attack: Replay redemption or manipulate balances
+Vulnerability: Server does not validate point balance or single-use redemption
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Modify request parameters controlling workflow (dates, statuses, balances)
+- Bypass client-side validations (hidden fields, JS checks)
+- Trigger unexpected sequences of actions (cancel → refund → reorder)
+- Exploit insufficient server-side checks for financial, discount, or reward systems
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Business logic flaws result from missing or weak enforcement of workflow rules:
+- Reliance on client-side checks
+- Unvalidated state transitions
+- Insufficient logging and monitoring of workflow actions
+- Lack of anomaly detection in transaction patterns
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Enforce all rules on the server-side
+- Validate all workflow transitions strictly
+- Apply strict checks on financial transactions, discounts, and reward systems
+- Implement logging and anomaly detection for suspicious patterns
+- Educate developers to anticipate logic abuse scenarios
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Business logic flaws can have financial, reputational, and operational impacts
+- They often bypass traditional security mechanisms because they exploit legitimate workflows
+- Regular code reviews, threat modeling, and testing edge-case scenarios help identify potential logic abuse
+</div>
+
+</body>
+</html>
