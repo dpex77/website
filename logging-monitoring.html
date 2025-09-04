@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insufficient Logging & Monitoring</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Insufficient Logging & Monitoring occurs when security-relevant events are either not logged, incompletely logged, or not actively monitored.  
+
+This prevents early detection of attacks or misuse, allowing incidents to go unnoticed until damage is done.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers can exploit this weakness to:  
+- Perform brute-force or credential stuffing attacks without detection  
+- Escalate privileges or change roles undetected  
+- Modify or delete resources without triggering alerts  
+- Persist in systems for long periods while remaining invisible  
+</div>
+
+<div class="card">
+<h2>2.1 Examples for Understanding:</h2>
+
+<b>Example 1: Missing Failed Login Logs</b>
+- Attacker performs multiple failed login attempts  
+- No log is generated → brute force goes undetected  
+
+<b>Example 2: Privilege Escalation Unnoticed</b>
+- Attacker escalates privileges using a misconfigured SUDO policy  
+- No log or alert generated → attacker gains admin access silently  
+
+<b>Example 3: Resource Modification Not Logged</b>
+- Attacker deletes critical data  
+- Logs exist but do not capture deletions or are scattered → incident only discovered later
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Causes of insufficient logging & monitoring:  
+- Logging not implemented for critical actions  
+- Inconsistent log formats across systems  
+- No centralized collection or correlation of events  
+- Lack of real-time monitoring or alerting  
+- Logs not reviewed regularly  
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+<b>Comprehensive Logging:</b>  
+- Log authentication success/failure  
+- Log privilege escalations and role changes  
+- Log resource create/update/delete actions  
+- Log administrative and security configuration changes  
+
+<b>Centralized Log Management:</b>  
+- Use SIEM/SOAR solutions (Splunk, ELK, Wazuh, Azure Sentinel)  
+- Normalize log formats across applications, servers, and devices  
+- Correlate events from multiple sources  
+
+<b>Monitoring & Alerting:</b>  
+- Implement real-time monitoring with IDS/IPS (Snort, Suricata)  
+- Set alerts for suspicious behavior (multiple failed logins, unusual data access)  
+- Review logs regularly for anomalies  
+
+<b>Retention & Protection:</b>  
+- Store logs securely with access controls and integrity checks  
+- Retain logs according to compliance requirements (PCI DSS, HIPAA, etc.)  
+- Regularly audit logs and alerting effectiveness
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Insufficient logging is often combined with other vulnerabilities to increase impact.  
+- Centralized logging and monitoring improves incident response and forensic capabilities.  
+- Even if a system is compromised, effective logging can shorten detection time and reduce damage.  
+</div>
+
+</body>
+</html>
