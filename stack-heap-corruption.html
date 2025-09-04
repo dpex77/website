@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack and Heap Corruption</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Stack and heap corruption occurs when a program overwrites memory on the stack or heap due to unsafe operations, often leading to crashes, unexpected behavior, or potential arbitrary code execution. 
+
+<b>Stack:</b> memory region for function calls, local variables, return addresses.  
+<b>Heap:</b> dynamically allocated memory during runtime (malloc, new).  
+
+Corruption happens when code writes outside allocated bounds or uses freed memory.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers exploit stack/heap corruption to:
+- Overwrite return addresses or function pointers (stack)
+- Hijack program control flow (e.g., execute shellcode)
+- Cause program crashes or DoS
+- Leak sensitive memory content
+
+Common causes:
+- Buffer overflows on stack or heap
+- Use-after-free on heap
+- Off-by-one errors
+- Improper pointer arithmetic
+</div>
+
+<div class="card">
+<h2>2.1 Examples for Understanding:</h2>
+
+<b>Example 1: Stack Corruption via Buffer Overflow</b>
+<code>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+void secret() {
+    printf("Secret executed!\n");
+}
+
+int main() {
+    char buffer[8];
+    strcpy(buffer, "AAAAAAAAAAAAAAAA"); // Overflows stack
+    printf("Buffer: %s\n", buffer);
+    return 0;
+}
+</code>
+Explanation: Writing past `buffer[8]` may overwrite the return address, allowing execution of `secret()` or causing a crash.
+
+<b>Example 2: Heap Corruption via Overwrite</b>
+<code>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int main() {
+    char *heap1 = (char*) malloc(8);
+    char *heap2 = (char*) malloc(8);
+
+    strcpy(heap1, "AAAAAAAAAAAA"); // Overflow heap1 into heap2
+    printf("heap2: %s\n", heap2);  // Corrupted data
+    free(heap1);
+    free(heap2);
+    return 0;
+}
+</code>
+Explanation: Writing beyond `heap1`’s allocated 8 bytes corrupts `heap2` memory, leading to undefined behavior or crash.
+
+<b>Example 3: Safe Stack/Heap Handling</b>
+<code>
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+
+int main() {
+    std::vector&lt;char&gt; buffer(8); // Dynamic, safe stack/heap memory
+    std::string input;
+    std::cout &lt;&lt; "Enter text: ";
+    std::getline(std::cin, input);
+
+    for (size_t i=0; i &lt; buffer.size() &amp;&amp; i &lt; input.size(); ++i)
+        buffer[i] = input[i];
+
+    std::cout &lt;&lt; "Buffer content: ";
+    for (char c : buffer) std::cout &lt;&lt; c;
+    std::cout &lt;&lt; std::endl;
+    return 0;
+}
+</code>
+Explanation: Using `std::vector` prevents writing outside allocated memory.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Causes of stack/heap corruption include:
+- Unsafe memory operations (strcpy, sprintf, direct pointer writes)
+- Use-after-free or double-free
+- Buffer overflows and off-by-one errors
+- Legacy C/C++ code without bounds checking
+- Lack of memory-safe libraries
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Replace unsafe functions with safe versions (strncpy, snprintf, memcpy_s)
+- Use dynamic containers (std::string, std::vector)
+- Initialize pointers and memory properly
+- Free memory only once (avoid double-free)
+- Enable compiler protections:
+    <code>-fstack-protector</code>, ASLR, NX/DEP, PIE
+- Use runtime analysis tools: Valgrind, AddressSanitizer
+- Code review and static analysis for unsafe memory patterns
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Stack corruption often leads to return-oriented programming (ROP) attacks.  
+- Heap corruption can bypass simple stack protections to execute arbitrary code.  
+- Safe memory handling, input validation, and modern C++ practices greatly reduce risk.
+</div>
+
+</body>
+</html>
