@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Hijacking</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Session Hijacking occurs when an attacker takes over a valid user session by stealing or predicting the session ID.  
+A successful hijack allows the attacker to impersonate the victim and access protected resources without authentication.
+
+Common methods for session hijacking:
+- Network sniffing (capturing cookies in transit)  
+- Cross-Site Scripting (XSS) attacks to steal session tokens  
+- Man-in-the-Middle (MITM) attacks  
+- Predictable session IDs or session fixation exploitation
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s point of view, session hijacking provides direct access to an authenticated user’s session.
+
+<b>Attack Flow:</b>
+1. Attacker captures or predicts a valid session ID.  
+2. Attacker injects the session ID into their own requests (via cookie, header, or URL).  
+3. The server authenticates the attacker as the legitimate user.  
+4. Attacker gains full access to the user’s session and sensitive data.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Use network sniffing tools to capture session cookies on insecure connections.  
+- Exploit XSS vulnerabilities to read and exfiltrate session tokens from victim browsers.  
+- Predict or brute-force weak session IDs.  
+- Exploit unencrypted or unvalidated session tokens in URLs or cookies.  
+- Observe server responses to identify active session IDs and reuse them.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Applications that allow session hijacking typically have weaknesses in one or more of the following areas:
+
+- Transmitting session tokens over unencrypted channels (HTTP instead of HTTPS).  
+- Failing to invalidate sessions on logout.  
+- Using predictable session IDs.  
+- Allowing session fixation.  
+- Not implementing proper cookie security attributes.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Use HTTPS exclusively to encrypt all session traffic.  
+- Generate strong, random, and unique session IDs.  
+- Set cookies with Secure, HttpOnly, and SameSite attributes.  
+- Regenerate session IDs after login and privilege changes.  
+- Invalidate sessions on logout or inactivity.  
+- Monitor for unusual session usage and concurrent logins.  
+- Implement proper XSS protections to prevent token theft.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Testing: Attempt to reuse a captured session ID in a different browser or device.  
+- Modern frameworks (Django, Flask, Spring) often handle secure session management by default.  
+- Related vulnerabilities: Session Fixation, Insecure Cookies, Inadequate Logout, Cross-Site Scripting (XSS).  
+- Business impact: Account takeover, data breach, regulatory compliance issues, and reputation damage.
+</div>
+
+</body>
+</html>
