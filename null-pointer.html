@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Null Pointer Dereference (C++)</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+A Null Pointer Dereference occurs when a program attempts to access or manipulate memory through a pointer that is null (points to nothing). 
+This results in undefined behavior, often causing application crashes or system instability. In C/C++, dereferencing a null pointer can lead to Denial-of-Service (DoS) vulnerabilities.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+An attacker can exploit null pointer dereferences to:
+- Cause application crashes remotely (DoS)
+- Trigger unexpected behavior if the program handles null pointers incorrectly
+- Potentially gain information about memory layout or program logic in some cases
+This is mostly a crash/DoS attack vector rather than direct code execution.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+<b>Example 1: Simple Null Pointer Dereference</b>
+<code>
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int *ptr = NULL;
+    cout &lt;&lt; *ptr;  // Dereferencing null pointer
+    return 0;
+}
+</code>
+
+<b>Example 2: Function Dereferencing Null Pointer</b>
+<code>
+#include &lt;iostream&gt;
+using namespace std;
+
+void printValue(int* ptr) {
+    cout &lt;&lt; *ptr &lt;&lt; endl;  // Risky if ptr is null
+}
+
+int main() {
+    int* p = NULL;
+    printValue(p);  // Causes crash
+    return 0;
+}
+</code>
+
+<b>Example 3: Null Dereference via Class Pointer</b>
+<code>
+#include &lt;iostream&gt;
+using namespace std;
+
+class MyClass {
+public:
+    void greet() { cout &lt;&lt; "Hello!" &lt;&lt; endl; }
+};
+
+int main() {
+    MyClass* obj = NULL;
+    obj-&gt;greet();  // Dereferencing null pointer
+    return 0;
+}
+</code>
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Null pointer dereferences occur due to:
+- Uninitialized pointers
+- Improper pointer assignment
+- Lack of validation before dereferencing
+- Assumptions that pointer is always valid
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Always check pointers before dereferencing: <code>if(ptr != nullptr)</code>
+- Initialize pointers properly before use
+- Use smart pointers (C++11+): <code>std::unique_ptr</code>, <code>std::shared_ptr</code> to avoid null references
+- Apply static analysis tools to detect potential null dereferences
+- Use languages or frameworks with built-in null safety if possible
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Null pointer dereference is primarily exploited for Denial-of-Service attacks
+- Combining with race conditions or memory corruption may increase impact in some cases
+- Tools like ASan (AddressSanitizer) can help detect null pointer dereferences during testing
+</div>
+
+</body>
+</html>
