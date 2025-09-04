@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Injection</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+.attacker {
+    background: #ffe5e5; /* light red */
+    border-left: 6px solid #cc0000;
+}
+
+.defender {
+    background: #e6f3ff; /* light blue */
+    border-left: 6px solid #0059b3;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Code injection would mean injecting the malicious code into the application so they get executed. Code injection usually runs with the context of the application itself. So, code injection typically compromises the application but may not directly affect the entire system. Code injection usually targets the application’s runtime environment (e.g., Python, PHP, Java, JavaScript).
+</div>
+
+<div class="card attacker">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious actions, such as:
+...
+</div>
+
+<div class="card attacker">
+<h2>2.1 Attempts of an Attacker:</h2>
+A simplest example of code injection would be pythons eval function. Eval allows code injection. Eval() executes code, not just expressions. It's equivalent to letting someone type code directly into your program.
+...
+</div>
+
+<div class="card defender">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Never trust user input
+
+Input validation: Check that incoming data meets expected patterns or types TLV. Example: only allow integers for age, only allow letters for names.
+...
+</div>
+
+<div class="card defender">
+<h2>3.1 Solutions for a Defender:</h2>
+3.1 Avoid eval()  
+Why unsafe? eval() executes arbitrary expressions. If user input reaches eval(), attackers can run arbitrary Python code and take control of the application.
+...
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+Difference from Command Injection:
+...
+</div>
+
+</body>
+</html>
