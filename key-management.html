@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Improper Key Management in AWS</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Improper key management occurs when cryptographic keys, secrets, or credentials are generated, stored, rotated, or revoked insecurely.  
+In AWS, this can lead to unauthorized access to services, data leaks, or full account compromise.
+</div>
+
+<div class="card">
+<h2>2. Common AWS Key Management Mistakes</h2>
+
+<b>2.1 Hardcoded Keys in Code</b>
+- Access keys and secrets stored in source code or config files.  
+- Risk: Anyone with code access can use your AWS resources.  
+
+<b>2.2 Unencrypted Keys</b>
+- Keys or secrets stored in plaintext in S3, EC2, or environment variables.  
+- Risk: Exposure if storage is misconfigured or compromised.  
+
+<b>2.3 Lack of Rotation</b>
+- Keys never rotated or rotated infrequently.  
+- Risk: Stolen or leaked keys remain valid indefinitely.  
+
+<b>2.4 Excessive Permissions</b>
+- Keys or IAM roles have overly broad privileges (e.g., AdministratorAccess when not required).  
+- Risk: Compromise of key → complete account takeover.  
+
+<b>2.5 Poor Use of Temporary Credentials</b>
+- Using long-lived keys instead of temporary tokens via AWS STS.  
+- Risk: Long-lived credentials are easier to exfiltrate and misuse.
+</div>
+
+<div class="card">
+<h2>3. Examples / Real-World Scenarios</h2>
+
+<b>Example 1: Hardcoded AWS Key</b>
+<code>
+aws_access_key = "AKIA...EXAMPLE"
+aws_secret_key = "abcd1234EXAMPLE"
+</code>
+- Risk: If code is pushed to GitHub, attackers can immediately access AWS resources.  
+
+<b>Example 2: S3 Bucket with Unencrypted Keys</b>
+- Keys stored in a plaintext file in S3 (publicly readable).  
+- Risk: Anyone with link can download keys and compromise AWS account.  
+
+<b>Example 3: Long-lived IAM User Keys</b>
+- IAM user keys never rotated.  
+- Risk: If compromised, keys can be used indefinitely until manually revoked.  
+
+<b>Example 4: Excessive Permissions</b>
+- Keys tied to a user with full admin access.  
+- Risk: Exploit leads to total AWS account compromise (EC2, S3, Lambda, etc.).
+</div>
+
+<div class="card">
+<h2>4. Best Practices / Mitigations in AWS</h2>
+
+<b>4.1 Use IAM Roles and Temporary Credentials</b>
+- Prefer IAM roles for EC2, Lambda, and ECS.  
+- Use AWS STS (Security Token Service) for temporary credentials.  
+
+<b>4.2 Avoid Hardcoding Secrets</b>
+- Store secrets in AWS Secrets Manager or AWS Systems Manager Parameter Store.  
+- Grant least-privilege access to applications and users.  
+
+<b>4.3 Enable Encryption</b>
+- Use KMS-managed encryption for stored secrets.  
+- Ensure secrets at rest and in transit are encrypted.  
+
+<b>4.4 Rotate Keys Regularly</b>
+- Configure automatic rotation in Secrets Manager.  
+- Rotate IAM user access keys at least every 90 days.  
+
+<b>4.5 Enforce Least Privilege</b>
+- Grant only the permissions needed for a specific task.  
+- Avoid using root account keys in applications.  
+
+<b>4.6 Audit and Monitor</b>
+- Enable AWS CloudTrail for logging key usage.  
+- Set up CloudWatch alarms for unusual API activity.
+</div>
+
+<div class="card">
+<h2>5. Summary</h2>
+Improper key management in AWS can lead to serious breaches, data leaks, and full account compromise.  
+Best practice is to use roles, temporary credentials, encrypted storage, strict access control, and continuous monitoring.
+</div>
+
+</body>
+</html>
