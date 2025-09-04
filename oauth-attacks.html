@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attacks Against OAuth/SSO</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+OAuth and SSO (Single Sign-On) are widely used for authentication and authorization in web applications.  
+They allow users to log in using tokens or external identity providers.  
+However, improper implementation or misconfigurations can lead to attacks that compromise user accounts or sensitive data.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s point of view, OAuth/SSO vulnerabilities provide opportunities to impersonate users, steal data, or bypass authentication.  
+
+<b>1. Impersonation Attacks:</b>  
+- Attacker pretends to be a legitimate user by stealing OAuth tokens, SSO cookies, or credentials.  
+- Once impersonation succeeds, the attacker gains the same access as the target user.  
+
+<b>2. Authentication Attacks:</b>  
+- <b>Credential attacks:</b> Steal user credentials via phishing, brute force, or password reuse.  
+- <b>Session/token-based attacks:</b> Hijack active sessions, reuse access tokens, or replay expired tokens.  
+- <b>Protocol/flow attacks:</b> Exploit OAuth flows (Authorization Code, Implicit, PKCE) using phishing, MITM, CSRF, or replay attacks.  
+
+<b>3. Token Leakage:</b>  
+- OAuth tokens accidentally exposed in URLs, browser history, or server logs.  
+- Tokens can be intercepted if transmitted over insecure channels.  
+
+<b>4. Improper Redirect URIs:</b>  
+- Attackers can exploit weak or unvalidated redirect URIs to capture authorization codes or access tokens.  
+
+<b>5. Open Redirect Vulnerabilities:</b>  
+- Vulnerable endpoints may allow redirection to attacker-controlled sites, leaking tokens or credentials.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Phishing users to obtain access tokens or credentials.  
+- Intercepting tokens via insecure HTTP or poorly configured HTTPS.  
+- Reusing old or leaked tokens to impersonate users.  
+- Exploiting CSRF in OAuth flows to perform unauthorized actions.  
+- Manipulating redirect URIs to capture authorization codes.  
+- Exploiting open redirects to steal tokens from legitimate flows.  
+- Exploiting weak PKCE implementations to bypass authorization checks.  
+- Exploiting misconfigured SSO identity providers for token injection.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Defenders must be aware that OAuth/SSO implementations can leak sensitive tokens, allow unauthorized access, or be vulnerable to flow manipulation.  
+
+Key risks:  
+- Tokens stored insecurely (localStorage, URL, logs).  
+- Weak redirect URI validation.  
+- Open redirects in web applications.  
+- Long-lived or non-expiring tokens.  
+- Incomplete logout across SSO applications.  
+- Lack of PKCE or other protections in public clients.  
+- Inadequate CSRF protection in OAuth flows.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Use secure storage for tokens (HTTPOnly, Secure cookies or encrypted storage).  
+- Always transmit tokens over HTTPS.  
+- Implement short-lived tokens with refresh mechanisms.  
+- Strictly validate redirect URIs against a whitelist; never accept user-controlled URIs.  
+- Avoid open redirects; validate and sanitize all redirect inputs.  
+- Implement CSRF protection for OAuth flows (state parameter).  
+- Use PKCE for public clients to prevent authorization code interception.  
+- Monitor and revoke suspicious tokens.  
+- Educate users about phishing risks and encourage MFA.  
+- Regularly audit OAuth and SSO configurations and flows.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Differences between OAuth and SSO attacks: OAuth focuses on token-based authorization, SSO on session and identity federation.  
+- Attack chains: An attacker can combine phishing, open redirect, and token leakage to fully compromise accounts.  
+- Testing tools: OAuth2.0 Proxy, Burp Suite OAuth plugins, and manual flow inspection.  
+- Recommended mitigations: Always combine proper flow implementation, token security, and user education.
+</div>
+
+</body>
+</html>
