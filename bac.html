@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broken Access Control</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Broken Access Control occurs when an application fails to properly enforce restrictions on what authenticated and unauthenticated users can do.  
+This allows attackers to bypass authorization checks and access resources, functions, or data that should be restricted.  
+
+Key aspects include:  
+- Vertical Access Control: Preventing users from accessing higher-privileged functions (e.g., a regular user accessing admin functions).  
+- Horizontal Access Control: Preventing users from accessing other users’ data (e.g., modifying another user’s profile).  
+- Insecure Direct Object References (IDOR): Accessing objects via URL, parameters, or IDs without proper authorization.  
+- Function-level access bypass: Unprotected endpoints allow execution of privileged operations.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s point of view, broken access control can be highly rewarding because it often provides access to sensitive data or administrative functions without credentials.  
+
+<b>Impact:</b>  
+- Unauthorized data access: View, modify, or delete other users’ data.  
+- Privilege escalation: Gain admin or higher-level privileges.  
+- Business logic abuse: Perform operations not intended by the application (e.g., free product purchase, bypassing workflow approvals).  
+- Complete system compromise in poorly designed applications.
+
+<b>Common Exploit Scenarios:</b>  
+1. Modifying URL parameters: /profile?id=123 → /profile?id=124  
+2. Changing POST body values to access or modify another user's data.  
+3. Using API endpoints directly that lack access checks.  
+4. Accessing admin-only functions by guessing or enumerating endpoints.  
+5. Manipulating cookies or JWT tokens to escalate privileges.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Horizontal privilege bypass: Attempting to access other users’ resources by changing user ID in requests.  
+- Vertical privilege escalation: Accessing admin endpoints as a normal user by modifying roles in requests.  
+- Forced browsing: Navigating directly to hidden URLs (admin panels, sensitive APIs).  
+- IDOR exploitation: Using predictable object IDs to access unauthorized objects.  
+- JWT manipulation: Modifying claims or tokens to gain higher privileges.  
+- Parameter tampering: Changing form fields, JSON payloads, or query parameters.  
+- File access bypass: Accessing restricted files or directories through direct paths.  
+- Function-level bypass: Calling API endpoints without UI validation.  
+- Exploiting misconfigured security rules in web servers, proxies, or ACLs.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Defenders often miss broken access control due to:  
+- Lack of proper authorization checks at the server side (relying only on client-side checks).  
+- Missing role or permission validation for endpoints and objects.  
+- Predictable IDs or tokens used for sensitive objects.  
+- APIs exposing sensitive functionality without authentication or authorization.  
+- Over-permissive CORS, proxies, or firewall rules allowing unauthorized access.  
+- Assuming security through obscurity (hiding URLs or parameters).  
+- Insufficient logging and monitoring of access attempts.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Enforce server-side authorization on every endpoint and object. Never rely on client-side checks.  
+- Implement role-based access control (RBAC) or attribute-based access control (ABAC) properly.  
+- Validate object-level access: Ensure users can only access resources they are authorized to.  
+- Use unpredictable identifiers (UUIDs, random tokens) instead of sequential IDs.  
+- Ensure function-level access control: Protect admin APIs and sensitive functions.  
+- Apply least privilege principle: Only grant minimum permissions required.  
+- Protect APIs: Ensure all endpoints validate the user’s role and permissions.  
+- Implement logging and monitoring to detect unusual access patterns.  
+- Regularly perform security testing: Penetration testing, code review, automated scanners.  
+- Handle errors securely: Do not leak sensitive info in error messages.  
+- Consider rate limiting, throttling, and anomaly detection to reduce exploitation risk.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Testing: Tools like Burp Suite, OWASP ZAP, Postman, or custom scripts can be used to test access controls.  
+- Common vulnerabilities related to Broken Access Control:  
+  - Insecure Direct Object References (IDOR)  
+  - Forced browsing / hidden endpoint access  
+  - Privilege escalation  
+- Business impact: Data breaches, unauthorized transactions, reputation loss, regulatory penalties (e.g., GDPR, HIPAA).  
+- Example: Changing <code>order_id=1001</code> to <code>order_id=1002</code> could allow one user to access another user's order.  
+- Preventing this requires consistent server-side enforcement and object-level validation.
+</div>
+
+</body>
+</html>
