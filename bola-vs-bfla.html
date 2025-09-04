@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BOLA vs BFLA</title>
+<title>BOLA vs BFLA vs BOPLA</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -37,89 +37,93 @@ code {
 
 <div class="card">
 <h2>1. Overview:</h2>
-BOLA (Broken Object Level Access Control) and BFLA (Broken Function Level Access Control) are both access control vulnerabilities, but they target different aspects of an application:
+Access control vulnerabilities can be divided into object-level and function-level issues:
 
-- <b>BOLA:</b> Unauthorized access to objects or resources belonging to other users.  
-- <b>BFLA:</b> Unauthorized access to functions, actions, or features intended for higher-privileged users.
+- <b>BOLA:</b> Broken Object Level Access – unauthorized access to other users’ objects/resources.  
+- <b>BFLA:</b> Broken Function Level Access – unauthorized access to restricted functions/features.  
+- <b>BOPLA:</b> Broken Object & Privilege Level Access – a combination where attackers exploit both object-level and privilege-level access simultaneously for maximum impact.
 </div>
 
 <div class="card">
 <h2>2. Vulnerability from an Attacker Perspective:</h2>
-<b>BOLA:</b>  
-Attackers target object-level permissions. By manipulating identifiers like IDs, UUIDs, filenames, or database keys, they can access other users’ sensitive data.  
+<b>BOLA:</b> Access another user’s object by manipulating IDs, filenames, or tokens.  
 
-<b>Example:</b>  
+<b>Example:</b>
 <code>
-# User A accesses their profile
-GET /api/user/1234/profile
+GET /api/user/1234/profile  # User A's profile
+GET /api/user/5678/profile  # User A now sees User B's profile
+</code>
 
-# Attacker changes the ID to view another user’s profile
-GET /api/user/5678/profile
-</code>  
+<b>BFLA:</b> Access a restricted function or feature without proper role check.  
 
-Impact: Data exposure, privacy violation, potential regulatory compliance issues.
-
-<b>BFLA:</b>  
-Attackers target function or action-level permissions. By calling endpoints or triggering actions restricted to admins or premium users, they can perform unauthorized operations.  
-
-<b>Example:</b>  
+<b>Example:</b>
 <code>
-# Normal user tries to delete another user
-POST /api/admin/deleteUser
+POST /api/admin/deleteUser  # Normal user tries to delete another user
+GET /upload                  # Only admins should access
+</code>
 
-# Or access privileged feature
-GET /upload   # Only admins should access
-</code>  
+<b>BOPLA:</b> Exploit both object and privilege weaknesses. For instance, a low-privilege user manipulates object IDs while invoking admin-only functionality.  
 
-Impact: System manipulation, privilege abuse, unauthorized feature use.
+<b>Example:</b>
+<code>
+POST /api/admin/updateUser?user_id=5678  
+# User A modifies User B's data even though they are not admin
+</code>
+
+Impact: Complete unauthorized control, data manipulation, and potential full compromise of sensitive resources.
 </div>
 
 <div class="card">
 <h2>2.1 Attacker Attempts:</h2>
 <b>BOLA:</b>
-- Enumerate object identifiers (sequential IDs, predictable UUIDs).  
-- Manipulate request parameters (query string, JSON payload, form data) to access unauthorized objects.  
-- Exploit weak authorization checks at object level.  
+- Enumerate object identifiers (IDs, UUIDs).  
+- Modify parameters to access other users’ data.  
 
 <b>BFLA:</b>
-- Attempt unauthorized HTTP requests to admin or restricted endpoints.  
-- Exploit insufficient role-based access control (RBAC).  
-- Use replayed or forged requests to access restricted functionality.
+- Directly call restricted endpoints.  
+- Exploit weak role checks.  
+
+<b>BOPLA:</b>
+- Combine object manipulation and function abuse.  
+- Chain attacks: e.g., exploit IDOR while executing admin-only actions.  
+- Target both resource-level and privilege-level weaknesses simultaneously.
 </div>
 
 <div class="card">
 <h2>3. Vulnerability from a Defender Perspective:</h2>
-<b>BOLA:</b>
-- Developers often fail to validate that the requesting user owns or is authorized for a specific object.  
-- Object-level authorization checks may be missing or incorrectly implemented.  
+<b>BOLA:</b> Missing or weak object-level authorization.  
 
-<b>BFLA:</b>
-- Application exposes functionality without checking user roles or privileges.  
-- Endpoints may assume client-side or superficial server-side checks are enough.  
-- Role escalation attacks become possible.
+<b>BFLA:</b> Function-level access not properly enforced.  
+
+<b>BOPLA:</b> Applications failing to enforce both object-level ownership and privilege-based function restrictions. This allows attackers to bypass multiple layers of protection.
 </div>
 
 <div class="card">
 <h2>3.1 Solutions for a Defender:</h2>
-<b>BOLA Mitigations:</b>  
-- Implement strict object-level authorization on every request.  
-- Use secure, unpredictable object identifiers (UUIDs or opaque tokens).  
-- Validate ownership or access rights on server side before returning data.  
-- Regularly test endpoints for IDOR vulnerabilities.
+<b>BOLA Mitigations:</b>
+- Implement strict server-side object authorization.  
+- Use opaque, unpredictable identifiers.  
+- Validate ownership on each request.  
 
-<b>BFLA Mitigations:</b>  
-- Enforce role-based access control (RBAC) for all actions and features.  
-- Verify authorization on server-side for each function, regardless of client trust.  
-- Implement principle of least privilege: users can only perform actions they need.  
-- Audit and log privileged function access.
+<b>BFLA Mitigations:</b>
+- Enforce RBAC on all sensitive functions.  
+- Validate roles server-side.  
+- Principle of least privilege.  
+
+<b>BOPLA Mitigations:</b>
+- Combine BOLA and BFLA protections.  
+- Ensure object-level access checks and function-level authorization are performed together.  
+- Test endpoints for chained attacks.  
+- Regular audits and logging of all privileged actions and sensitive object access.
 </div>
 
 <div class="card">
 <h2>4. Extras:</h2>
-- <b>BOLA Question:</b> “Can I access someone else’s object?” → Resource-level access issue.  
-- <b>BFLA Question:</b> “Can I perform a function I shouldn’t?” → Action/feature-level access issue.  
-- Both are part of OWASP’s Broken Access Control category.  
-- Attackers often chain BOLA and BFLA with other vulnerabilities (like injection or session hijacking) for maximum impact.
+- <b>BOLA Question:</b> “Can I access someone else’s object?” → Resource-level issue.  
+- <b>BFLA Question:</b> “Can I perform a function I shouldn’t?” → Action/feature-level issue.  
+- <b>BOPLA Question:</b> “Can I manipulate another user’s object while performing restricted actions?” → Combined object & privilege issue.  
+- Part of OWASP Broken Access Control category.  
+- Often used together with injection or session attacks for maximum impact.
 </div>
 
 </body>
