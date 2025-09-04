@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missing Authentication for Critical Functions</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Missing Authentication for Critical Functions occurs when important actions in an application or system can be executed without verifying the identity of the user.  
+This exposes high-impact functionality to anyone, including unauthenticated attackers, potentially compromising security, integrity, or availability.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s perspective, missing authentication provides direct access to critical operations without restriction.  
+
+<b>Examples of Exploitable Actions:</b>  
+- System upgrade or software patch deployment  
+- Configuration changes or server settings  
+- Account deletion or creation  
+- System shutdown or restart  
+- Modifying sensitive data (financial, personal, or operational)  
+
+<b>High-value Impact:</b>  
+- Full system compromise  
+- Unauthorized data modification or deletion  
+- Service disruption or downtime  
+- Bypassing security controls meant for privileged users  
+- Escalation opportunities when combined with other vulnerabilities
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Discover unprotected endpoints (GET, POST, DELETE) using fuzzing or browsing API documentation.  
+- Attempt direct requests to critical functions without providing authentication tokens, sessions, or credentials.  
+- Use tools like Burp Suite or curl to test access to endpoints that should be restricted.  
+- Chain with other vulnerabilities (e.g., privilege escalation, injection) to maximize impact.  
+
+<b>Example:</b>  
+<code>
+# Vulnerable endpoint:
+POST /upgrade
+# No authentication check in place
+
+# Attacker can trigger upgrade directly:
+curl -X POST http://target.com/upgrade
+</code>
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Defenders must ensure that all critical functions are protected and never accessible without proper authentication.  
+
+<b>Common Mistakes:</b>  
+- Assuming network-level controls are sufficient to restrict access.  
+- Exposing APIs to internal or external users without token/session validation.  
+- Lack of role-based access control (RBAC).  
+- Insufficient logging of sensitive operations.  
+- Relying solely on client-side validation (JavaScript checks).
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+<b>1. Enforce Authentication:</b>  
+- Require login, API tokens, or session verification before executing critical functions.  
+
+<b>2. Role-Based Access Control (RBAC):</b>  
+- Assign roles and permissions to restrict which users can perform sensitive actions.  
+
+<b>3. Validate Access Tokens:</b>  
+- Check validity of sessions, JWTs, or API keys on every request.  
+
+<b>4. Logging and Auditing:</b>  
+- Record all access attempts to critical functions, successful or failed, for monitoring and incident response.  
+
+<b>5. Security Testing:</b>  
+- Include missing authentication tests in your security assessment and penetration testing.  
+- Use automated scanners to detect unprotected endpoints.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Even internal endpoints should enforce authentication; internal networks are not inherently trustworthy.  
+- Combine with strong authorization checks to prevent privilege abuse.  
+- Always assume an attacker can reach endpoints and enforce authentication and authorization consistently.  
+- OWASP Top 10: This vulnerability falls under “Broken Access Control” (A01:2021).  
+</div>
+
+</body>
+</html>
