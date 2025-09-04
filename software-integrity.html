@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software Integrity & Failures</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Software integrity failures occur when software, libraries, or data are modified, corrupted, or tampered with—intentionally by attackers or unintentionally through corruption or faulty updates. These failures compromise trust and can introduce malware, vulnerabilities, or unintended behavior.
+</div>
+
+<div class="card">
+<h2>2. Causes of Integrity Failures:</h2>
+
+<b>2.1 Untrusted Sources</b>
+- Installing software from unknown websites or peer-to-peer sources
+- Using cracked or pirated applications (often contain malware)
+
+<b>2.2 Third-Party Tools & Libraries</b>
+- Downloading packages or libraries from unofficial repositories
+- Lack of verification of code integrity (no checksums or signatures)
+
+<b>2.3 Firmware or Script Updates</b>
+- Updating devices or scripts without hash or digital signature verification
+- Risk of installing malicious or corrupted updates
+</div>
+
+<div class="card">
+<h2>3. Attacker Perspective:</h2>
+- Inject malicious code into widely-used software or libraries
+- Exploit users’ trust in digitally signed updates if signatures are stolen or compromised
+- Compromise supply chain to reach a large user base
+- Cause long-term espionage, backdoors, or system compromise
+</div>
+
+<div class="card">
+<h2>4. Defender Perspective:</h2>
+- Systems are at risk if integrity checks are missing or ignored
+- Lack of secure channels for software updates allows tampering
+- Users may install software without validating sources
+- Attackers may exploit automated updates to distribute malware
+</div>
+
+<div class="card">
+<h2>5. Real-World Example:</h2>
+
+<b>SolarWinds Attack (SUNBURST)</b>
+- Attackers compromised SolarWinds’ build environment
+- Malicious code injected into Orion software updates
+- Code was digitally signed, appearing trusted
+- Distributed to thousands of organizations, including government agencies
+- Demonstrates risks of supply chain compromise and trusted updates
+</div>
+
+<div class="card">
+<h2>6. Mitigation & Best Practices:</h2>
+
+<b>Source Validation:</b>
+- Only download software from trusted vendors and official repositories
+- Avoid pirated or cracked software
+
+<b>Integrity Verification:</b>
+- Use digital signatures, hashes (SHA-256/512), or checksums to verify downloads
+- Verify third-party libraries before integrating
+
+<b>Secure Update Mechanisms:</b>
+- Enforce signed firmware or software updates
+- Ensure automatic updates fetch from secure, authenticated sources
+- Implement rollback protections to recover from compromised updates
+
+<b>Monitoring:</b>
+- Monitor software integrity with file integrity tools (e.g., Tripwire, OSSEC)
+- Track unexpected changes in critical binaries or scripts
+
+<b>Supply Chain Security:</b>
+- Audit dependencies, libraries, and build environments
+- Apply strict access controls and code review for build pipelines
+</div>
+
+<div class="card">
+<h2>7. Summary:</h2>
+Software and integrity failures are a critical risk in modern IT. By enforcing source verification, cryptographic validation, secure update mechanisms, and supply chain auditing, organizations can reduce the risk of malware injection, tampered software, and compromised trust.
+</div>
+
+</body>
+</html>
