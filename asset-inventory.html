@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Improper Asset Inventory</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Improper Asset Inventory occurs when an organization lacks an accurate, complete, and up-to-date record of all IT assets, including hardware, software, cloud resources, and network components.  
+Without proper inventory, organizations cannot properly secure, patch, or monitor assets, leaving critical gaps exploitable by attackers.
+</div>
+
+<div class="card">
+<h2>2. Common Issues</h2>
+
+<b>2.1 Unknown Devices or Servers</b>
+- Devices on the network that are not tracked (IoT, test servers, personal devices).  
+- Risk: Vulnerable endpoints may be exploited unnoticed.
+
+<b>2.2 Untracked Software / Applications</b>
+- Applications installed without central approval or record.  
+- Risk: Outdated or vulnerable software can be exploited (e.g., old web servers, database versions).
+
+<b>2.3 Shadow IT in Cloud</b>
+- Cloud instances or services deployed without IT awareness.  
+- Risk: Misconfigured security, exposed sensitive data, or noncompliance with policies.
+
+<b>2.4 Forgotten Accounts or Credentials</b>
+- Service accounts, API keys, or inactive users not documented.  
+- Risk: Can be used for lateral movement or persistent access by attackers.
+
+<b>2.5 Incomplete Configuration Tracking</b>
+- Lack of configuration and versioning info for assets.  
+- Risk: Hard to assess vulnerabilities or enforce patches consistently.
+</div>
+
+<div class="card">
+<h2>3. Real-World Examples</h2>
+
+<b>Example 1: Forgotten Test Server</b>
+- A forgotten test VM running outdated software exposes open ports to the internet.  
+- Consequence: Exploitable by attackers, bypassing firewall rules for main production assets.
+
+<b>Example 2: Untracked Cloud Bucket</b>
+- An S3 bucket created by a developer is publicly accessible but not included in inventory.  
+- Consequence: Sensitive data exposed to the public.
+
+<b>Example 3: Shadow IoT Devices</b>
+- Smart sensors or printers connected to network without logging.  
+- Consequence: Attackers pivot from unsecured IoT devices into internal network.
+</div>
+
+<div class="card">
+<h2>4. Best Practices / Mitigations</h2>
+
+<b>4.1 Maintain a Centralized Asset Inventory</b>
+- Track all hardware, software, cloud resources, IoT, and network components.  
+- Include owner, location, configuration, and update status.
+
+<b>4.2 Continuous Discovery & Monitoring</b>
+- Use automated tools to scan networks and cloud environments.  
+- Detect new or rogue assets immediately.
+
+<b>4.3 Enforce Approval Processes</b>
+- All new hardware, software, and cloud deployments must go through IT approval.  
+
+<b>4.4 Integrate with Security Controls</b>
+- Tie inventory to patch management, vulnerability scans, and access controls.  
+
+<b>4.5 Regular Audits</b>
+- Periodically reconcile inventory with actual assets.  
+- Identify gaps, unauthorized devices, and outdated systems.
+</div>
+
+<div class="card">
+<h2>5. Summary</h2>
+Without proper asset inventory, organizations cannot fully understand their attack surface.  
+Maintaining accurate, continuously updated records of all assets is critical for risk management, compliance, and security monitoring.
+</div>
+
+</body>
+</html>
