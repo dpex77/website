@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buffer Overflow (C/C++)</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+A buffer is a contiguous memory block used to store data temporarily. <b>Buffer Overflow</b> occurs when data written into a buffer exceeds its allocated size, overwriting adjacent memory. This can cause crashes, denial-of-service (DoS), or allow arbitrary code execution. C and C++ are most susceptible due to manual memory management and lack of automatic bounds checking.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Buffer overflows allow attackers to:
+- Overwrite critical data like return addresses or function pointers
+- Execute arbitrary code (shellcode)
+- Crash the program (DoS)
+- Leak sensitive memory content
+
+Unsafe functions commonly exploited:
+<code>strcpy(), strcat(), gets(), sprintf(), scanf("%s")</code>
+These functions do not check the length of input against buffer size.
+</div>
+
+<div class="card">
+<h2>2.1 Examples for Understanding:</h2>
+
+<b>Example 1: Basic Overflow</b>
+<code>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main() {
+    char buffer[8];
+    strcpy(buffer, "AAAAAAAAAAAAAAAA"); // Too long for buffer
+    printf("%s\n", buffer);
+    return 0;
+}
+</code>
+Explanation: Writing more than 8 bytes overwrites adjacent memory. Can cause crash or unexpected behavior.
+
+<b>Example 2: Overflow affecting return address</b>
+<code>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+void secret() {
+    printf("Secret function executed!\n");
+}
+
+int main() {
+    char buffer[16];
+    printf("Enter input: ");
+    gets(buffer); // Unsafe, no bounds checking
+    printf("You entered: %s\n", buffer);
+    return 0;
+}
+</code>
+Explanation: Overflowing `buffer` may overwrite the return address to point to `secret()`. Illustrates how attackers can hijack control flow.
+
+<b>Example 3: Safe Alternative using std::string</b>
+<code>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+int main() {
+    std::string input;
+    std::cout &lt;&lt; "Enter text: ";
+    std::getline(std::cin, input); // Automatically resizes
+    std::cout &lt;&lt; "You entered: " &lt;&lt; input &lt;&lt; std::endl;
+    return 0;
+}
+</code>
+Explanation: `std::string` grows dynamically and prevents buffer overflows.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Buffer overflows occur due to:
+- Unsafe C functions (strcpy, gets)
+- Fixed-size buffers with uncontrolled input
+- Lack of input validation
+- Legacy code not using modern memory-safe practices
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Replace unsafe functions with safe alternatives: <code>strncpy(), snprintf(), fgets()</code>
+- Use dynamic containers: <code>std::string, std::vector</code>
+- Validate input length before copying
+- Enable compiler protections: <code>-fstack-protector</code>, <code>ASLR</code>, <code>NX</code> stack
+- Use static and dynamic analysis tools (Valgrind, AddressSanitizer)
+- Refactor legacy code to modern memory-safe constructs
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Exploit mitigation: Stack canaries, ASLR, NX/DEP, PIE
+- Languages like Python/Java prevent these due to automatic memory management
+- Overflow attacks are a classic source of remote code execution in C/C++ programs
+</div>
+
+</body>
+</html>
