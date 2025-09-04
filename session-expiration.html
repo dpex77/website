@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Expiration & Logout</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Inadequate logout and session expiration occurs when applications do not properly terminate sessions or fail to expire them after a period of inactivity.  
+This allows attackers to reuse sessions, even after the user believes they have logged out, leading to account compromise or unauthorized access.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers can exploit weak session termination or long-lived sessions to gain unauthorized access.  
+
+<b>Attack Flow:</b>  
+1. User logs into the application.  
+2. User leaves the device unattended or logs out.  
+3. Session ID remains valid on the server.  
+4. Attacker reuses the session ID to access the account without credentials.  
+
+This is especially dangerous on shared devices or when session tokens are predictable or insecurely stored.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Accessing session tokens stored in browser memory or cookies after logout.  
+- Using stolen session tokens from a network sniffing attack (HTTP connections without Secure cookies).  
+- Exploiting applications that do not invalidate old session IDs after logout or session timeout.  
+- Reusing tokens on other devices or browser instances.  
+- Observing session IDs in URL parameters and replaying them.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Defenders often fail to properly manage session lifecycle:
+
+- Sessions persist after logout.  
+- Session IDs are not regenerated after authentication.  
+- Session timeout is too long or not enforced.  
+- No absolute expiration (persistent sessions).  
+- Browser back button can re-access sensitive pages after logout.  
+- Tokens stored insecurely (localStorage, cookies without HttpOnly).
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Invalidate session IDs immediately upon logout.  
+- Regenerate session ID after login and sensitive actions.  
+- Enforce session timeout after inactivity and absolute session expiration.  
+- Implement "no cache" headers to prevent back-button access to sensitive pages:  
+  <code>Cache-Control: no-store, no-cache, must-revalidate</code>  
+- Use Secure and HttpOnly cookies to store session IDs.  
+- Limit session reuse and implement logout notification if possible.  
+- Monitor for concurrent sessions and optionally notify users.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Testing: Log in from one browser, log out, then attempt to access sensitive pages using back button or stored session ID.  
+- Related vulnerabilities: Session Hijacking, Insecure Cookies, Session Fixation.  
+- Business impact: Unauthorized access, account compromise, data breaches, regulatory non-compliance.  
+- Tools for testing: Burp Suite, OWASP ZAP, browser developer tools.
+</div>
+
+</body>
+</html>
