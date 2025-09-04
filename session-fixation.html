@@ -1,96 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Session Fixation</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    h2 {
-      color: #ef5350;
-    }
-    section {
-      margin-bottom: 20px;
-    }
-    pre {
-      background: #f9f9f9;
-      padding: 10px;
-      border-left: 4px solid #4CAF50;
-      overflow-x: auto;
-    }
-    ul {
-      margin-left: 20px;
-    }
-    ol {
-      margin-left: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Fixation</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
 </head>
 <body>
-  <h1>Session Fixation</h1>
 
-  <section>
-    <h2>1. Overview</h2>
-    <p>
-      A session refers to the communication lifecycle between a client (browser) and a server.
-      The server creates a session ID and sends it to the browser (often via a cookie) to track
-      and identify the session in subsequent requests.
-    </p>
-    <pre>Set-Cookie: JSESSIONID=xyz123; Secure; HttpOnly; SameSite=Strict</pre>
-    <p>
-      Proper session management requires unique, unpredictable session IDs that are renewed after
-      authentication. Cookies should be secured using Secure, HttpOnly, and SameSite attributes.
-    </p>
-  </section>
+<div class="card">
+<h2>1. Overview:</h2>
+A session refers to the communication lifecycle between a client (browser) and a server.  
+The server creates a session ID and sends it to the browser (usually via a cookie) to track and identify the session in subsequent requests.
 
-  <section>
-    <h2>2. Vulnerability from an attacker perspective</h2>
-    <p>
-      Session Fixation occurs when an attacker can force a victim to use a known session ID, allowing
-      the attacker to hijack the authenticated session.
-    </p>
+<pre>Set-Cookie: JSESSIONID=xyz123; Secure; HttpOnly; SameSite=Strict</pre>
 
-    <h3>2.1 Attempts of an attacker</h3>
-    <ol>
-      <li>Attacker obtains a valid session ID from the target app (pre-login).</li>
-      <li>Attacker forces victim to use that session ID via URL, link, or cookie injection.</li>
-      <li>Victim logs in, and the application keeps the same session ID.</li>
-      <li>Attacker reuses the same session ID to hijack the authenticated session.</li>
-    </ol>
-  </section>
+Proper session management requires:
+- Unique, unpredictable session IDs  
+- Secure cookies with attributes: Secure, HttpOnly, SameSite  
+- Session timeout/absolute timeout/session renewal  
+- Logout destroys the session completely
+</div>
 
-  <section>
-    <h2>3. Vulnerability from a defender perspective</h2>
-    <p>
-      Applications that do not generate a new session ID upon authentication are vulnerable.
-      Sessions that are not properly invalidated on logout or use predictable IDs are also at risk.
-    </p>
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Session Fixation occurs when an attacker can force a victim to use a known session ID, allowing the attacker to hijack the authenticated session.
 
-    <h3>3.1 Solutions of a defender</h3>
-    <ul>
-      <li>Generate a new, unique session ID immediately after successful authentication.</li>
-      <li>Use secure, HttpOnly, and SameSite attributes for session cookies.</li>
-      <li>Implement proper session timeout and renewal policies.</li>
-      <li>Ensure logout destroys the session completely, preventing reuse.</li>
-      <li>Avoid exposing session IDs in URLs.</li>
-    </ul>
-  </section>
+<b>Attack Flow:</b>
+1. Attacker obtains a valid session ID from the target application.  
+2. Attacker forces victim to use that session ID (via URL parameter, cookie injection, or link).  
+3. Victim logs in, and the application keeps the same session ID.  
+4. Attacker reuses the same session ID to hijack the authenticated session.
+</div>
 
-  <section>
-    <h2>4. Extras</h2>
-    <ul>
-      <li>Testing: Capture pre-login session ID and compare with post-login ID to detect vulnerability.</li>
-      <li>Mitigations are standard in most modern web frameworks (session regeneration, secure cookies).</li>
-    </ul>
-  </section>
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Capture pre-login session ID (from cookie or URL).  
+- Force victim to use this session ID by sending a crafted link or cookie.  
+- Observe whether session ID remains the same after login.  
+- If unchanged → session fixation vulnerability exists.  
+- If changed → mitigation in place.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Applications that do not generate a new session ID upon authentication are vulnerable.  
+Sessions that are predictable or not properly invalidated on logout are at risk.  
+
+<b>Defender considerations:</b>
+- Session IDs should never be exposed in URLs.  
+- Cookies must be Secure, HttpOnly, and SameSite.  
+- Sessions should expire after a reasonable duration.  
+- Logout should completely destroy the session.  
+- Generate a new session ID after login.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Implement session ID regeneration immediately after authentication.  
+- Enforce secure cookie attributes: Secure, HttpOnly, SameSite.  
+- Apply proper session timeout and renewal policies.  
+- Ensure logout destroys all session data.  
+- Avoid exposing session IDs in URLs.  
+- Test session fixation by comparing pre-login and post-login session IDs.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Testing: Capture pre-login session ID and compare with post-login ID to detect vulnerability.  
+- Modern web frameworks usually mitigate session fixation by regenerating session IDs and enforcing secure cookies.  
+- Related attacks: Session Hijacking, Insecure Cookie Handling.
+</div>
+
 </body>
 </html>
