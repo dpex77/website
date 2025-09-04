@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Fixation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #ef5350;
+    }
+    section {
+      margin-bottom: 20px;
+    }
+    pre {
+      background: #f9f9f9;
+      padding: 10px;
+      border-left: 4px solid #4CAF50;
+      overflow-x: auto;
+    }
+    ul {
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Session Fixation</h1>
+
+  <section>
+    <h2>Overview</h2>
+    <p>
+      A session refers to the communication lifecycle between a client (browser) and a server.
+      The server creates a session ID and sends it to the browser (often via a cookie) to track
+      and identify the session in subsequent requests.
+    </p>
+    <pre>Set-Cookie: JSESSIONID=xyz123; Secure; HttpOnly; SameSite=Strict</pre>
+  </section>
+
+  <section>
+    <h2>Key Concepts</h2>
+    <ul>
+      <li><strong>Session ID:</strong> Unique, unpredictable, and random. Should not be exposed in URL (?sessionid=XYZ).</li>
+      <li><strong>Secured Cookies:</strong> Use Secure (HTTPS only), HttpOnly (prevents JS access), and SameSite (restricts cross-origin usage/CSRF).</li>
+      <li><strong>Session Timeout:</strong> Session should expire after a certain time; use absolute timeout and session renewal policies.</li>
+      <li><strong>Logout Behavior:</strong> Proper logout should prevent using the back button to reuse the session.</li>
+      <li><strong>Session Fixation Prevention:</strong> Generate a new session ID after authentication.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Attack Flow</h2>
+    <ol>
+      <li>Attacker obtains a valid session ID from the target app (e.g., by visiting login page).</li>
+      <li>Attacker forces victim to use that session ID (via link, cookie injection, or URL parameter like ?sessionid=12345).</li>
+      <li>Victim logs in → app keeps the same session ID.</li>
+      <li>Attacker reuses that ID to hijack the authenticated session.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Testing</h2>
+    <ol>
+      <li>Visit the app and capture the pre-login session ID (cookie or URL parameter).</li>
+      <li>Authenticate with valid credentials.</li>
+      <li>Observe if the session ID changes after login:
+        <ul>
+          <li>If the same ID persists → vulnerable to session fixation.</li>
+          <li>If a new ID is issued → safe (mitigation in place).</li>
+        </ul>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Prevention / Mitigation</h2>
+    <ul>
+      <li>Always issue a new session ID after successful authentication.</li>
+      <li>Use secure, HttpOnly, and SameSite cookie attributes.</li>
+      <li>Implement session timeout and renewal mechanisms.</li>
+      <li>Ensure logout destroys the session completely.</li>
+    </ul>
+  </section>
+</body>
+</html>
