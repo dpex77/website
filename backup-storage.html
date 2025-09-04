@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misconfigured Backup or Storage</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Misconfigured Backup or Storage occurs when backup systems, cloud storage, or local storage are improperly configured, leaving sensitive data exposed, inaccessible, or at risk of loss.
+</div>
+
+<div class="card">
+<h2>2. Common Issues</h2>
+
+<b>2.1 Unencrypted Backups</b>
+- Backups stored without encryption at rest or in transit.  
+- Risk: Data theft if backups are stolen or intercepted.
+
+<b>2.2 Publicly Accessible Storage</b>
+- Misconfigured S3 buckets, Azure Blob containers, or NAS drives accessible to everyone.  
+- Risk: Data exposure or accidental deletion.
+
+<b>2.3 No Access Controls</b>
+- Backups lack proper IAM/ACL policies.  
+- Risk: Unauthorized users can read, modify, or delete backups.
+
+<b>2.4 Retention Mismanagement</b>
+- Backups not rotated or old backups not pruned.  
+- Risk: Excessive storage cost, non-compliance, or old sensitive data exposure.
+
+<b>2.5 Incomplete or Corrupt Backups</b>
+- Backups missing files, databases, or metadata; corrupted during creation.  
+- Risk: Inability to restore critical data when needed.
+
+<b>2.6 Lack of Testing</b>
+- Backups created but not regularly tested for restore.  
+- Risk: Backup failure discovered only during disaster recovery.
+</div>
+
+<div class="card">
+<h2>3. Real-World Examples</h2>
+
+<b>Example 1: Public S3 Buckets</b>
+- Sensitive customer data left in S3 buckets with open read permissions.  
+- Consequence: Data breach and regulatory fines.
+
+<b>Example 2: Unencrypted Database Backups</b>
+- PostgreSQL backups stored on file server without encryption.  
+- Consequence: Insider threat or stolen device exposes sensitive information.
+
+<b>Example 3: Ransomware Recovery Failure</b>
+- Backups not tested or incomplete.  
+- Consequence: Ransomware attack cannot be mitigated, leading to downtime and data loss.
+</div>
+
+<div class="card">
+<h2>4. Best Practices / Mitigations</h2>
+
+<b>4.1 Encrypt Backups</b>
+- Use strong encryption (AES-256) for backups at rest and in transit.  
+- Protect encryption keys in a secure KMS or vault.
+
+<b>4.2 Proper Access Controls</b>
+- Implement role-based access, least privilege, and IAM policies.  
+- Restrict who can create, read, or delete backups.
+
+<b>4.3 Backup Testing</b>
+- Regularly perform restore drills to ensure data integrity and completeness.  
+- Verify both full and incremental backups.
+
+<b>4.4 Secure Cloud Storage</b>
+- Check S3/Azure/GCP bucket permissions regularly.  
+- Enable logging, monitoring, and alerts for public access or modifications.
+
+<b>4.5 Retention and Rotation Policies</b>
+- Maintain backup retention aligned with compliance (e.g., 30, 90, 180 days).  
+- Remove or archive old backups securely.
+
+<b>4.6 Monitoring and Auditing</b>
+- Enable logging of backup creation, modification, and deletion.  
+- Audit backup policies periodically to ensure compliance and security.
+</div>
+
+<div class="card">
+<h2>5. Summary</h2>
+Misconfigured backup or storage can lead to data breaches, non-compliance, and unrecoverable data loss.  
+Implement encryption, access control, rotation, and regular restore testing to mitigate risks.
+</div>
+
+</body>
+</html>
