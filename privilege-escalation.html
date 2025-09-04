@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privilege Escalation</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Privilege Escalation occurs when a user gains higher privileges than intended, often aiming to become root or another privileged user.  
+It can happen due to misconfigurations, vulnerable binaries, weak permissions, or kernel-level bugs.  
+
+Common types:  
+- **Vertical Privilege Escalation:** A low-privileged user becomes an admin or root.  
+- **Horizontal Privilege Escalation:** A user gains access to resources of another user at the same privilege level.  
+- Exploits may target OS features (SUID, SGID, sudo), filesystems (world-writable files), scheduled tasks (cron jobs), application vulnerabilities, or kernel bugs.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+From an attacker’s point of view, privilege escalation is highly valuable because it allows complete control over the system or sensitive data.  
+
+<b>SUID / SGID Misuse:</b>  
+- Executables with SUID run as the file owner (often root). Example: /usr/bin/passwd  
+<code>ls -l /usr/bin/passwd</code>  
+Shows <code>-rwsr-xr-x</code>, the 's' indicates SUID.  
+- If the binary has a vulnerability (e.g., unsafe shell command execution), it can be exploited to gain root.  
+
+<b>Sudo Privileges:</b>  
+- Misconfigured sudo allows normal users to run privileged commands.  
+<code>sudo -l</code> shows permitted commands.  
+- Exploiting sudo misconfigurations can lead to full system compromise.  
+
+<b>World-writable Files/Directories:</b>  
+- Files or directories writable by all users (<code>chmod 777</code>) can be modified to execute malicious code or escalate privileges.  
+- Example: Overwriting a script executed by root cron.  
+
+<b>Cron Jobs:</b>  
+- Scheduled tasks running as root or privileged users can be abused if scripts or binaries they execute are writable by attackers.  
+
+<b>Kernel Exploits:</b>  
+- Bugs like Dirty COW (Linux) or BlueKeep (Windows) allow attackers to elevate privileges from user mode to root/system.  
+
+<b>Directory Traversal:</b>  
+- Attackers can access sensitive files like <code>/etc/passwd</code> by manipulating file paths.  
+- Example: <code>http://example.com/view?file=../../../../etc/passwd</code>  
+
+<b>IDOR (Insecure Direct Object Reference):</b>  
+- Attacker modifies object references in requests to access unauthorized data.  
+- Example:  
+<code>https://example.com/user/profile?user_id=102</code> → change to → <code>user_id=101</code>  
+
+These methods allow attackers to access sensitive data, modify system configurations, or gain administrative control.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Searching for SUID/SGID binaries:  
+<code>find / -type f -perm -4000 2>/dev/null</code>  
+<code>find / -type f -perm -2000 2>/dev/null</code>  
+- Testing misconfigured sudo rules with <code>sudo -l</code>.  
+- Checking world-writable files/directories: <code>find / -writable -type f 2>/dev/null</code>  
+- Examining cron jobs: <code>crontab -l</code> or <code>ls -la /etc/cron.*</code>  
+- Exploiting kernel vulnerabilities to escalate to root.  
+- Exploiting directory traversal in web apps to access <code>/etc/shadow</code> or config files.  
+- Exploiting IDOR in APIs, URLs, or file references to access other users’ data.  
+- Combining multiple small vulnerabilities for chained escalation (e.g., writable cron script + SUID binary).
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Defenders face risks if:  
+- SUID/SGID binaries are not regularly audited for vulnerabilities.  
+- Sudo rules are overly permissive.  
+- World-writable files or directories exist in sensitive locations.  
+- Cron jobs execute scripts writable by non-privileged users.  
+- Kernel vulnerabilities are unpatched.  
+- Applications do not validate file paths, allowing directory traversal.  
+- APIs expose direct object references without proper authorization.  
+- Access control and object ownership checks are inconsistent or missing.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Audit and minimize SUID/SGID binaries: Remove SUID/SGID bits unless absolutely necessary.  
+- Limit sudo permissions: Only allow specific commands for specific users.  
+- Secure file permissions: Avoid world-writable files in sensitive directories (<code>chmod 755</code> or stricter).  
+- Protect cron jobs: Ensure scripts executed by root are not writable by unprivileged users.  
+- Patch the kernel and OS regularly to fix privilege escalation vulnerabilities.  
+- Normalize and validate file paths on the server; prevent directory traversal.  
+- Implement strict access controls and object-level checks to prevent IDOR.  
+- Monitor logs and system events for abnormal activity or access patterns.  
+- Use security tools (LinPEAS, Linux Exploit Suggester, Lynis) for auditing and detection.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Examples of privilege escalation exploits:  
+  - Exploiting SUID binaries to spawn a root shell.  
+  - Exploiting writable cron scripts to run commands as root.  
+  - Exploiting kernel vulnerabilities (Dirty COW) to overwrite memory and gain root.  
+- Prevent chained attacks by enforcing least privilege and hardening both system and application layers.  
+- Penetration testing for privilege escalation: Regularly test from low-privileged accounts to verify that escalation is not possible.  
+- Education: Train developers and sysadmins to follow security best practices for permissions, sudo, and file handling.
+</div>
+
+</body>
+</html>
