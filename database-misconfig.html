@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Misconfiguration & Handling</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Database misconfigurations occur when databases are deployed, maintained, or used with insecure settings. These vulnerabilities can lead to unauthorized access, data leaks, privilege escalation, and service disruption. Proper handling and security configurations are critical to protect sensitive information.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+Attackers exploit misconfigured databases to:
+- Perform SQL/NoSQL injection attacks
+- Access sensitive data due to weak or default credentials
+- Gain elevated privileges in the database
+- Exploit exposed ports or unencrypted data for data theft
+- Execute arbitrary code via unsafe extensions or functions
+</div>
+
+<div class="card">
+<h2>2.1 Examples for Understanding:</h2>
+
+<b>Example 1: MySQL Weak Credentials</b>
+- Default root account with no password allows attacker login  
+- Can read/write all databases, modify users, or drop tables  
+
+<b>Example 2: MongoDB Open Port</b>
+- MongoDB bound to public interface without auth  
+- Attacker connects directly and downloads sensitive JSON documents  
+
+<b>Example 3: SQLite Local File Theft</b>
+- Application stores SQLite DB on local disk without encryption  
+- If attacker gains file system access, data can be read directly  
+
+<b>Example 4: Redis Insecure Persistence</b>
+- Redis configured with no password, persistence enabled  
+- Attacker connects remotely and dumps in-memory data containing secrets
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Common causes of database misconfigurations:
+- Using default accounts and passwords
+- Improper role-based privileges and excessive permissions
+- Lack of encryption in transit or at rest
+- Unsafe extensions/plugins or features enabled by default
+- Exposed network interfaces or ports
+- Lack of patching and updates
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+<b>Authentication & Access Control:</b>  
+- Enforce strong authentication, disable anonymous/default accounts  
+- Apply least privilege principle for all users and roles  
+- Enable role-based access controls  
+
+<b>Input Handling:</b>  
+- Use parameterized queries or prepared statements  
+- Validate and sanitize user input to prevent injections  
+
+<b>Network & Encryption:</b>  
+- Bind databases to localhost or trusted networks only  
+- Enable SSL/TLS for data in transit  
+- Encrypt sensitive data at rest (TDE, SQLCipher, etc.)  
+
+<b>Configuration & Patching:</b>  
+- Regularly patch database servers (MySQL, PostgreSQL, Oracle CPU updates)  
+- Audit extensions, plugins, or features before enabling  
+- Monitor and restrict exposed ports, firewall rules  
+
+<b>Monitoring & Logging:</b>  
+- Enable database auditing and logs for sensitive operations  
+- Monitor failed logins, privilege changes, and suspicious queries
+</div>
+
+<div class="card">
+<h2>4. Examples of Database-Specific Vulnerabilities & Mitigations:</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr>
+<th>Database</th>
+<th>Type</th>
+<th>Common Vulnerabilities</th>
+<th>Mitigations</th>
+</tr>
+
+<tr>
+<td>MySQL</td>
+<td>RDBMS</td>
+<td>SQL Injection, Weak/default accounts, Privilege escalation, Unencrypted data</td>
+<td>Prepared statements, Strong authentication, Least privilege, SSL/TLS, Regular patching</td>
+</tr>
+
+<tr>
+<td>PostgreSQL</td>
+<td>ORDBMS</td>
+<td>SQL Injection, Misconfigured trust auth, DoS via heavy queries, Unsafe extensions</td>
+<td>Parameterized queries, SCRAM-SHA-256, Query timeouts, Audit extensions, Enable SSL</td>
+</tr>
+
+<tr>
+<td>SQLite</td>
+<td>Embedded</td>
+<td>SQL Injection, Database file theft, Locking/contention issues</td>
+<td>Input validation, Encrypt DB files, Secure file permissions</td>
+</tr>
+
+<tr>
+<td>MongoDB</td>
+<td>NoSQL (Document)</td>
+<td>No auth (older versions), NoSQL Injection, Exposed ports, $where allows JS</td>
+<td>Enable auth & roles, Sanitize inputs, Bind localhost, TLS/SSL, Encrypt at rest</td>
+</tr>
+
+<tr>
+<td>Redis</td>
+<td>NoSQL (Key-Value)</td>
+<td>No auth, Exposed ports, Data persistence leakage</td>
+<td>Enable AUTH, Bind localhost, TLS, Encrypt persistence files</td>
+</tr>
+
+<tr>
+<td>Oracle DB</td>
+<td>RDBMS</td>
+<td>SQL Injection in PL/SQL, Excessive privileges, Unpatched systems</td>
+<td>Patch CPU updates, Least privilege roles, Secure PL/SQL coding, TDE encryption</td>
+</tr>
+</table>
+</div>
+
+<div class="card">
+<h2>5. Extras:</h2>
+- Misconfigured databases are frequently targeted in data breaches.  
+- Following secure deployment practices, regular auditing, and proper monitoring drastically reduces the risk.  
+- Developers should combine secure coding, access control, and encryption to ensure database safety.
+</div>
+
+</body>
+</html>
