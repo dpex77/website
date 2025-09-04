@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insecure Cryptographic Algorithms</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Insecure cryptographic algorithms refer to outdated or weak cryptographic functions used for encryption, hashing, or signing. 
+They fail to provide adequate security, leaving data vulnerable to attacks such as brute force, collisions, or tampering.
+</div>
+
+<div class="card">
+<h2>2. Common Insecure Algorithms</h2>
+
+<b>2.1 Symmetric Encryption</b>
+- DES (56-bit key): Weak, can be brute-forced quickly.  
+- 3DES: Better than DES but deprecated due to small block size.  
+- RC4: Vulnerable to biases in key stream; not secure.  
+
+<b>2.2 Asymmetric Encryption</b>
+- RSA keys < 2048 bits: Can be factored with enough resources.  
+- Weak Diffie-Hellman groups (512/768-bit): Breakable by modern computers.  
+
+<b>2.3 Hash Functions</b>
+- MD5: Collision-prone, can be used to forge certificates or files.  
+- SHA-1: Susceptible to practical collision attacks.  
+
+<b>2.4 Message Authentication Codes</b>
+- HMAC-MD5: Weak due to MD5 vulnerabilities.  
+- Unkeyed checksums (CRC32) instead of proper MAC/HMAC.
+</div>
+
+<div class="card">
+<h2>3. Risks / Impact</h2>
+- Data exposure: Encrypted sensitive data can be decrypted by attackers.  
+- Integrity compromise: Weak hashes or MACs allow tampering of data or software.  
+- Authentication bypass: Tokens or signatures based on weak algorithms can be forged.  
+- Compliance failure: Violates PCI DSS, HIPAA, GDPR, and other security standards.
+</div>
+
+<div class="card">
+<h2>4. Examples</h2>
+
+<b>Example 1: Using MD5 for Password Hashing</b>
+<code>
+password_hash = md5(user_password)
+</code>
+- Fast algorithm → brute-force / rainbow table attacks are feasible.  
+
+<b>Example 2: Using DES for Encrypting Data</b>
+<code>
+cipher = DES.new(key, DES.MODE_ECB)
+encrypted_data = cipher.encrypt(data)
+</code>
+- DES key too short → vulnerable to brute-force.  
+
+<b>Example 3: RSA with 1024-bit Key</b>
+<code>
+openssl genrsa -out private_key.pem 1024
+</code>
+- Can be factored with modern computing power.  
+
+<b>Example 4: Using RC4 in TLS</b>
+- Vulnerable to biases, plaintext can be recovered from encrypted sessions.
+</div>
+
+<div class="card">
+<h2>5. Mitigation / Best Practices</h2>
+
+<b>5.1 Use Modern Algorithms</b>
+- Symmetric: AES-256 (GCM preferred for authenticated encryption).  
+- Asymmetric: RSA ≥ 2048 bits, ECC with P-256 or Curve25519.  
+- Hashing: SHA-256+, Argon2/Bcrypt for passwords.  
+- MAC: HMAC-SHA256 or AEAD modes.
+
+<b>5.2 Key Management</b>
+- Generate strong random keys.  
+- Rotate keys regularly.  
+- Store securely (HSM, Vault, KMS).  
+
+<b>5.3 Protocol & Library Updates</b>
+- Use modern TLS versions (1.2/1.3).  
+- Avoid deprecated algorithms in crypto libraries.  
+- Regularly review and update cryptographic dependencies.
+</div>
+
+<div class="card">
+<h2>6. Summary</h2>
+Using insecure algorithms exposes applications and data to cryptographic attacks, leading to potential compromise of confidentiality, integrity, and authentication.  
+Always adopt modern, standardized cryptographic primitives and follow secure key management practices.
+</div>
+
+</body>
+</html>
