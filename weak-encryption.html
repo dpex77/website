@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryptographic Failures</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Cryptographic failures occur when sensitive data is protected using weak, outdated, or improperly implemented cryptography. Such failures can expose data to interception, tampering, or unauthorized access.
+</div>
+
+<div class="card">
+<h2>2. Common Causes</h2>
+
+<b>2.1 Broken or Deprecated Algorithms</b>
+- Symmetric/Asymmetric: DES, 3DES, RC4, MD5, SHA-1  
+- Message Authentication Codes: Insecure HMAC implementations (e.g., HMAC-MD5)  
+- Weak key exchange: Small Diffie-Hellman groups (512/768-bit), export-grade ciphers
+
+<b>2.2 Outdated TLS Versions</b>
+- TLS 1.0 and 1.1 vulnerable to attacks like POODLE, BEAST  
+- Recommended: TLS 1.2+ (TLS 1.3 preferred)
+
+<b>2.3 Weak Keys</b>
+- Short RSA keys (<2048 bits) → brute-force feasible  
+- Weak ECC curves (P-192) → insufficient security margin  
+- Static or reused keys → predictable and exploitable
+
+<b>2.4 Insecure Key Storage</b>
+- Keys stored in plaintext on disk or in source code  
+- Keys in environment variables or unprotected config files  
+- Lack of HSM or secure vaults (HashiCorp Vault, AWS KMS)
+
+<b>2.5 Weak Hashing Algorithms</b>
+- MD5, SHA-1 (collision-prone)  
+- Unsalted password hashes → rainbow table attacks  
+- Inadequate key derivation (avoid fast hashes; prefer Argon2, bcrypt, PBKDF2)
+</div>
+
+<div class="card">
+<h2>3. Attacker Perspective</h2>
+- Exploit weak or broken algorithms to decrypt sensitive data  
+- Perform collision attacks on MD5/SHA-1 to forge data or signatures  
+- Steal keys from improperly secured storage  
+- Intercept communications over outdated TLS  
+- Brute-force short or reused keys
+</div>
+
+<div class="card">
+<h2>4. Defender Perspective</h2>
+- Using deprecated ciphers or TLS versions increases exposure  
+- Weak keys and poor storage make key compromise likely  
+- Insecure password hashing allows mass password cracking if breached  
+- Lack of key rotation increases the impact of a compromised key
+</div>
+
+<div class="card">
+<h2>5. Real-World Examples</h2>
+
+<b>1. POODLE Attack (2014)</b>
+- Exploited SSL 3.0 fallback  
+- Allowed attackers to decrypt secure cookies over HTTPS
+
+<b>2. MD5 Collision Attacks</b>
+- Certificates and digital signatures forged by exploiting MD5 collisions
+
+<b>3. Heartbleed Vulnerability</b>
+- While a memory bug, it exposed private keys stored in server memory
+
+<b>4. SolarWinds SUNBURST</b>
+- Integrity failure combined with improper cryptography allowed signed malicious updates
+</div>
+
+<div class="card">
+<h2>6. Best Practices / Mitigation</h2>
+
+<b>6.1 Use Strong, Modern Cryptography</b>
+- TLS 1.2/1.3 only, strong cipher suites  
+- Minimum key sizes: RSA ≥ 2048 bits, ECC ≥ 256 bits (P-256, Curve25519)
+
+<b>6.2 Secure Key Storage</b>
+- Hardware Security Modules (HSM) or Key Vaults  
+- Avoid plaintext or unprotected storage  
+- Separate storage for salts/peppers in password hashing
+
+<b>6.3 Strong Password Hashing</b>
+- Argon2, bcrypt, PBKDF2  
+- Use unique salt for each password  
+- Optionally add a pepper for additional security
+
+<b>6.4 Key Management</b>
+- Rotate keys regularly  
+- Revoke compromised keys immediately  
+- Use ephemeral session keys where possible
+
+<b>6.5 Continuous Verification</b>
+- Scan servers for weak ciphers (SSLyze, testssl.sh)  
+- Monitor certificates, check for expired or weak keys  
+- Audit cryptography usage in applications
+</div>
+
+<div class="card">
+<h2>7. Summary</h2>
+Cryptographic failures can compromise confidentiality, integrity, and authentication of sensitive data. Using strong, modern algorithms, secure key storage, proper hashing, and regular auditing are essential to mitigate these risks.
+</div>
+
+</body>
+</html>
