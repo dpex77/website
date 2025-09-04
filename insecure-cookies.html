@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insecure Cookies</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Insecure Cookies occur when session or authentication cookies are transmitted or stored without proper security controls.  
+Attackers can steal or manipulate cookies to impersonate users, hijack sessions, or gain unauthorized access.  
+
+Common causes:
+- Missing Secure attribute (allows sending over HTTP).  
+- Missing HttpOnly attribute (accessible via JavaScript, vulnerable to XSS).  
+- Missing SameSite attribute (enables CSRF attacks).  
+- Storing sensitive data in cookies without encryption.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+For attackers, insecure cookies provide an easy path to take over accounts or sessions.
+
+<b>Attack Flow:</b>
+1. Identify cookies used for authentication or session tracking.  
+2. Exploit missing security attributes to steal cookies:  
+   - Over HTTP connections (without Secure)  
+   - Via XSS (without HttpOnly)  
+   - Cross-site requests (without SameSite)  
+3. Reuse stolen cookies to impersonate the victim.
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+- Capture cookies transmitted over unencrypted HTTP using network sniffing.  
+- Inject malicious JavaScript to read cookie values if HttpOnly is not set.  
+- Trick users into sending cookies via CSRF attacks if SameSite is not enforced.  
+- Modify cookie values to escalate privileges if integrity checks are missing.  
+- Replay stolen cookies to hijack sessions on the server.
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+Applications with insecure cookies usually fail to enforce cookie-level protections:
+
+- Cookies sent over non-HTTPS connections.  
+- Cookies accessible via JavaScript (XSS risk).  
+- Cookies sent cross-origin without restriction.  
+- Sensitive information stored directly in cookies (e.g., passwords, tokens).  
+- Lack of proper expiration or session invalidation.
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Set <code>Secure</code> attribute to ensure cookies are only sent over HTTPS.  
+- Set <code>HttpOnly</code> to prevent JavaScript access.  
+- Set <code>SameSite=Strict/Lax</code> to protect against CSRF.  
+- Avoid storing sensitive data directly in cookies; use session IDs instead.  
+- Regenerate session IDs after authentication and logout.  
+- Set appropriate expiration and enforce server-side session invalidation.  
+- Validate cookie integrity using HMAC or encryption if needed.
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- Testing: Attempt to access cookies via JavaScript or through HTTP connections.  
+- Related vulnerabilities: Session Hijacking, Session Fixation, XSS, CSRF.  
+- Business impact: Account takeover, data leakage, regulatory non-compliance, and reputational damage.  
+- Tools for testing: Burp Suite, OWASP ZAP, and browser developer tools.
+</div>
+
+</body>
+</html>
