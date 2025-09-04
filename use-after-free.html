@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Use-After-Free (C++)</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview:</h2>
+Use-After-Free (UAF) occurs when a program continues to use memory after it has been freed. 
+In C++ this can lead to undefined behavior, crashes, memory corruption, or remote code execution. 
+UAF often happens in manual memory management when pointers are not properly nullified after deletion.
+</div>
+
+<div class="card">
+<h2>2. Vulnerability from an Attacker Perspective:</h2>
+An attacker can exploit UAF to:
+- Execute arbitrary code by controlling freed memory contents
+- Overwrite sensitive data structures
+- Trigger crashes or denial-of-service
+- Escalate privileges if exploited in a privileged process
+
+Attack opportunities exist in:
+- Network-facing services (e.g., server software)
+- Browser engines and interpreters
+- Any C++ application handling dynamic memory
+</div>
+
+<div class="card">
+<h2>2.1 Attempts of an Attacker:</h2>
+<b>Example 1: Simple UAF</b>
+<code>
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int* ptr = new int(42);
+    delete ptr;           // Memory freed
+    cout &lt;&lt; *ptr;   // Use-after-free
+    return 0;
+}
+</code>
+
+<b>Example 2: UAF with array</b>
+<code>
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int* arr = new int[5]{1,2,3,4,5};
+    delete[] arr;
+    arr[0] = 100;   // Use-after-free
+    cout &lt;&lt; arr[0];
+    return 0;
+}
+</code>
+
+<b>Example 3: UAF leading to potential code execution</b>
+<code>
+#include &lt;iostream&gt;
+using namespace std;
+
+struct Data {
+    int value;
+};
+
+int main() {
+    Data* d = new Data();
+    delete d;
+    Data* attacker = new Data(); // Memory allocator may reuse freed memory
+    attacker->value = 999;       // Overwrites old pointer
+    cout &lt;&lt; d->value;      // Use-after-free may now print 999
+    return 0;
+}
+</code>
+</div>
+
+<div class="card">
+<h2>3. Vulnerability from a Defender Perspective:</h2>
+UAF arises due to:
+- Manual memory management mistakes
+- Dangling pointers after deletion
+- Reusing freed memory without reinitialization
+- Poor pointer ownership tracking
+- Missing bounds checking on dynamic allocations
+</div>
+
+<div class="card">
+<h2>3.1 Solutions for a Defender:</h2>
+- Nullify pointers after freeing: <code>delete ptr; ptr = nullptr;</code>
+- Use smart pointers (C++11+): <code>std::unique_ptr, std::shared_ptr</code>
+- Avoid manual delete/free when possible
+- Use tools like AddressSanitizer (ASan) or Valgrind to detect UAF
+- Enable compiler flags for runtime checks
+- Implement proper object ownership and lifetime management
+</div>
+
+<div class="card">
+<h2>4. Extras:</h2>
+- UAF can be combined with heap spraying to achieve RCE
+- Frequent in C/C++ applications with complex dynamic memory
+- Security-critical applications (browsers, servers) often use mitigations like:
+  - Pointer invalidation after free
+  - Memory allocation randomization
+  - Guard pages and canaries
+</div>
+
+</body>
+</html>
