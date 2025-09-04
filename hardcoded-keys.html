@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardcoded Keys and Secrets</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Hardcoded keys and secrets refer to credentials, API keys, cryptographic keys, tokens, or passwords embedded directly in source code, binaries, or configuration files. 
+These can be extracted by attackers, compromising the security of applications, services, or sensitive data.
+</div>
+
+<div class="card">
+<h2>2. Common Causes</h2>
+
+<b>2.1 Embedded Secrets in Source Code</b>
+- API keys, passwords, encryption keys written directly in code.  
+- Often committed to version control (GitHub, GitLab, etc.).  
+
+<b>2.2 Configuration Files</b>
+- Secrets stored in plaintext config files shipped with applications.  
+
+<b>2.3 Compiled Binaries / Mobile Apps</b>
+- Keys embedded in executables, libraries, or mobile apps.  
+- Reverse engineering can reveal them.  
+
+<b>2.4 Third-Party Libraries / SDKs</b>
+- Libraries containing their own hardcoded keys or tokens.  
+- Developers may inadvertently include them.
+</div>
+
+<div class="card">
+<h2>3. Attacker Perspective</h2>
+- Extract keys from public repositories, code, or binaries.  
+- Access sensitive resources without authorization (databases, APIs, cloud services).  
+- Decrypt data encrypted with hardcoded secrets.  
+- Use the same key across environments to escalate privileges.
+</div>
+
+<div class="card">
+<h2>4. Defender Perspective</h2>
+- Hardcoded secrets are a single point of failure.  
+- They are difficult to rotate without redeploying applications.  
+- Exposure may result in widespread compromise.  
+- Violates compliance requirements for secure secret management.
+</div>
+
+<div class="card">
+<h2>5. Examples</h2>
+
+<b>Example 1: API Key in Source Code</b>
+<code>const API_KEY = "12345abcdef";</code>
+- Anyone inspecting the code can access the service with full privileges.
+
+<b>Example 2: Database Credentials in Configuration</b>
+<code>
+db_user = "admin"
+db_pass = "P@ssw0rd123"
+</code>
+- If leaked, attacker can connect directly to the database.
+
+<b>Example 3: Hardcoded Encryption Key</b>
+<code>
+const ENCRYPTION_KEY = "abcdef1234567890";
+</code>
+- All encrypted user data can be decrypted if the key is discovered.
+
+<b>Example 4: Embedded OAuth Token</b>
+<code>
+const ACCESS_TOKEN = "ya29.A0ARrdaM...xyz";
+</code>
+- Enables full API access without user consent or authentication.
+</div>
+
+<div class="card">
+<h2>6. Best Practices / Mitigation</h2>
+
+<b>6.1 Avoid Hardcoding Secrets</b>
+- Never store keys, passwords, or tokens directly in code.  
+
+<b>6.2 Use Secure Secret Management</b>
+- Environment variables for runtime injection.  
+- Dedicated secret management systems (HashiCorp Vault, AWS KMS, Azure Key Vault).  
+- Encrypted configuration files with restricted access.
+
+<b>6.3 Rotate Keys Regularly</b>
+- Replace keys periodically or immediately if compromised.  
+
+<b>6.4 Limit Scope and Permissions</b>
+- Apply least privilege principle to all keys and secrets.  
+- Avoid using same keys across environments or services.
+
+<b>6.5 Monitor for Leaks</b>
+- Scan source code and repositories for secrets (GitLeaks, TruffleHog).  
+- Audit binaries, containers, and mobile apps for embedded secrets.
+</div>
+
+<div class="card">
+<h2>7. Summary</h2>
+Hardcoded keys and secrets are critical security vulnerabilities.  
+They can be easily extracted, giving attackers unauthorized access to sensitive resources.  
+Using secure secret management, proper access controls, key rotation, and regular audits are essential to mitigate this risk.
+</div>
+
+</body>
+</html>
