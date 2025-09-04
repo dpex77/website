@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missing Version Control for Configurations</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>1. Overview</h2>
+Missing Version Control for Configurations occurs when configuration files for servers, applications, or cloud resources are not tracked under version control.  
+This can lead to inconsistent deployments, misconfigurations, and difficulties in auditing changes or rolling back problematic updates.
+</div>
+
+<div class="card">
+<h2>2. Common Issues</h2>
+
+<b>2.1 Untracked Config Files</b>
+- Configurations stored locally on servers or in spreadsheets without a versioning system.  
+- Risk: Accidental overwrites, inconsistencies across environments, or lost changes.
+
+<b>2.2 Lack of Change History</b>
+- No record of who changed what and when.  
+- Risk: Hard to debug issues or investigate security incidents.
+
+<b>2.3 Inconsistent Environments</b>
+- Different versions of configs in dev, staging, and production.  
+- Risk: Bugs or security issues appear only in some environments.
+
+<b>2.4 No Rollback Capability</b>
+- If a configuration change breaks functionality, reverting is manual or error-prone.  
+- Risk: Extended downtime, security misconfigurations.
+
+<b>2.5 Unauthorized Changes</b>
+- Without version control, it's difficult to enforce change approval processes.  
+- Risk: Unauthorized or malicious modifications may go unnoticed.
+</div>
+
+<div class="card">
+<h2>3. Real-World Examples</h2>
+
+<b>Example 1: Web Server Misconfiguration</b>
+- Apache configuration updated on production server manually without tracking.  
+- Consequence: Inconsistent SSL settings across servers, some still vulnerable.
+
+<b>Example 2: Cloud Infrastructure Drift</b>
+- AWS CloudFormation templates manually modified in production without versioning.  
+- Consequence: Terraform or IaC deployments fail, security policies not enforced.
+
+<b>Example 3: Application Config Drift</b>
+- App settings stored in JSON/YAML locally, not in Git.  
+- Consequence: Developer mistakes overwrite database connection settings in production.
+</div>
+
+<div class="card">
+<h2>4. Best Practices / Mitigations</h2>
+
+<b>4.1 Use Version Control Systems</b>
+- Track all configuration files in Git or other VCS.  
+- Maintain history, commit messages, and authorship.
+
+<b>4.2 Implement Infrastructure as Code (IaC)</b>
+- Store cloud resource configurations (Terraform, CloudFormation, Ansible) in version control.  
+- Ensure all environments are provisioned consistently.
+
+<b>4.3 Code Review and Approval</b>
+- Require peer review for config changes.  
+- Integrate CI/CD pipelines to validate changes before deployment.
+
+<b>4.4 Automated Deployment</b>
+- Use scripts or IaC pipelines to apply changes rather than manual edits.  
+- Reduces human error and ensures consistent versions across environments.
+
+<b>4.5 Audit and Monitoring</b>
+- Periodically review configuration change history.  
+- Detect unauthorized or untracked modifications.
+</div>
+
+<div class="card">
+<h2>5. Summary</h2>
+Missing version control for configurations increases the risk of misconfigurations, inconsistent environments, and security incidents.  
+Implementing version control, IaC practices, and change management ensures traceability, rollback capability, and safer deployments.
+</div>
+
+</body>
+</html>
