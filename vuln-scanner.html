@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>vuln-scanner</title>
+  <style>
+    body {
+      background-color: #fff;
+      color: #000;
+      font-family: monospace;
+      text-align: center;
+      white-space: pre-wrap;
+      margin: 20px;
+    }
+    h1 {
+      text-decoration: underline;
+    }
+    .section {
+      margin: 20px 0;
+    }
+    .code {
+      text-align: left;
+      display: inline-block;
+      border: 1px solid black;
+      padding: 10px;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <h1>vuln-scanner</h1>
+
+  <div class="section">
+    <h2>Readme</h2>
+    <div class="code">
+XSS injection
+
+SQL Injection
+
+Command Injection
+
+Directory brute-force
+
+Open Redirects
+
+Security Headers check (CSP, X-Frame-Options, X-XSS-Protection, HSTS, etc.)
+
+CSRF protection (checks if forms have CSRF tokens)
+
+Server info disclosure (Server, X-Powered-By headers)
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Scanner Script</h2>
+    <div class="code">
+#!/usr/bin/env python3
+import requests
+import sys
+import re
+import urllib3
+from bs4 import BeautifulSoup
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def check_xss(url):
+    payload = "&lt;script&gt;alert(1)&lt;/script&gt;"
+    try:
+        r = requests.get(url, params={"q": payload}, verify=False, timeout=5)
+        if payload in r.text:
+            return True
+    except Exception:
+        pass
+    return False
+
+def check_sql_injection(url):
+    payloads = ["' OR '1'='1", "' OR 1=1 --", "\" OR \"1\"=\"1"]
+    try:
+        for p in payloads:
+            r = requests.get(url, params={"id": p}, verify=False, timeout=5)
+            if any(err in r.text.lower() for err in ["sql", "syntax", "mysql", "oracle", "postgres"]):
+                return True
+    except Exception:
+        pass
+    return False
+
+def check_command_injection(url):
+    payloads = [";id", "&& whoami", "| ls", "`uname -a`"]
+    try:
+        for p in payloads:
+            r = requests.get(url, params={"cmd": p}, verify=False, timeout=5)
+            if any(word in r.text.lower() for word in ["uid=", "linux", "root", "windows"]):
+                return True
+    except Exception:
+        pass
+    return False
+
+def check_open_redirect(url):
+    payload = "http://evil.com"
+    try:
+        r = requests.get(url, params={"next": payload}, allow_redirects=False, verify=False, timeout=5)
+        if r.status_code in [301, 302] and "evil.com" in r.headers.get("Location", ""):
+            return True
+    except Exception:
+        pass
+    return False
+
+def check_headers(url):
+    try:
+        r = requests.get(url, verify=False, timeout=5)
+        missing = []
+        required = [
+            "Content-Security-Policy",
+            "X-Frame-Options",
+            "X-XSS-Protection",
+            "Strict-Transport-Security"
+        ]
+        for h in required:
+            if h not in r.headers:
+                missing.append(h)
+        return missing, r.headers
+    except Exception:
+        return [], {}
+
+def check_csrf(url):
+    try:
+        r = requests.get(url, verify=False, timeout=5)
+        soup = BeautifulSoup(r.text, "html.parser")
+        forms = soup.find_all("form")
+        for form in forms:
+            inputs = form.find_all("input")
+            if not any("csrf" in (i.get("name", "")).lower() for i in inputs):
+                return True
+    except Exception:
+        pass
+    return False
+
+def check_directory_bruteforce(base_url):
+    wordlist = ["admin", "login", "test", "phpinfo.php", "robots.txt", "backup", ".git"]
+    found = []
+    for word in wordlist:
+        url = base_url.rstrip("/") + "/" + word
+        try:
+            r = requests.get(url, verify=False, timeout=5)
+            if r.status_code == 200:
+                found.append(url)
+        except Exception:
+            continue
+    return found
+
+def scan(target):
+    if not target.startswith("http"):
+        target = "https://" + target
+
+    print(f"\\n[+] Scanning target: {target}")
+
+    print("[*] Checking for XSS...")
+    if check_xss(target):
+        print("[!] Possible XSS vulnerability found")
+    else:
+        print("[-] No XSS found")
+
+    print("[*] Checking for SQL Injection...")
+    if check_sql_injection(target):
+        print("[!] Possible SQL Injection vulnerability found")
+    else:
+        print("[-] No SQLi found")
+
+    print("[*] Checking for Command Injection...")
+    if check_command_injection(target):
+        print("[!] Possible Command Injection vulnerability found")
+    else:
+        print("[-] No Command Injection found")
+
+    print("[*] Checking for Open Redirects...")
+    if check_open_redirect(target):
+        print("[!] Possible Open Redirect found")
+    else:
+        print("[-] No Open Redirect found")
+
+    print("[*] Checking Security Headers...")
+    missing, headers = check_headers(target)
+    if missing:
+        print(f"[!] Missing security headers: {', '.join(missing)}")
+    else:
+        print("[+] Security headers OK")
+
+    print("[*] Checking CSRF protection...")
+    if check_csrf(target):
+        print("[!] Forms without CSRF tokens detected")
+    else:
+        print("[+] CSRF protection seems present")
+
+    print("[*] Running directory brute-force...")
+    dirs = check_directory_bruteforce(target)
+    if dirs:
+        print("[!] Interesting directories found:")
+        for d in dirs:
+            print(f"    - {d}")
+    else:
+        print("[-] No interesting directories found")
+
+    if "Server" in headers or "X-Powered-By" in headers:
+        print(f"[!] Server info disclosed: {headers.get('Server', '')} {headers.get('X-Powered-By', '')}")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} &lt;target&gt;")
+        sys.exit(1)
+    scan(sys.argv[1])
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Execution</h2>
+    <div class="code">
+└─# python3 scanner.py 192.168.209.138:443
+
+[+] Scanning target: https://192.168.209.138:443
+[*] Checking for XSS...
+[-] No XSS found
+[*] Checking for SQL Injection...
+[!] Possible SQL Injection vulnerability found
+[*] Checking for Command Injection...
+[-] No Command Injection found
+[*] Checking for Open Redirects...
+[-] No Open Redirect found
+[*] Checking Security Headers...
+[!] Missing security headers: Content-Security-Policy, X-Frame-Options, X-XSS-Protection, Strict-Transport-Security
+[*] Checking CSRF protection...
+[+] CSRF protection seems present
+[*] Running directory brute-force...
+[-] No interesting directories found
+[!] Server info disclosed: Werkzeug/3.0.1 Python/3.12.3
+    </div>
+  </div>
+</body>
+</html>
