@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSH Memory Monitoring Lab</title>
+<style>
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #ffffff;
+    color: #000000;
+    padding: 20px;
+    text-align: center;
+  }
+  h1, h2, h3 {
+    color: #000000;
+    font-weight: bold;
+  }
+  h1 { font-size: 2em; margin-bottom: 0.2em; }
+  h2 { font-size: 1.5em; margin-top: 1em; }
+  h3 { font-size: 1.2em; margin-top: 0.8em; }
+  pre {
+    background-color: #f4f4f4;
+    color: #000000;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    text-align: left;
+  }
+  .success { font-weight: bold; }
+  .failed { font-weight: bold; }
+  .info { font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>SSH Memory Monitoring Lab</h1>
+
+<h2>Overview</h2>
+<p>This lab demonstrates remote memory monitoring via SSH. The script connects to a target server using SSH, collects memory usage statistics over a 2-minute interval, plots them, and exits.</p>
+
+<ul>
+<li>Uses Paramiko for SSH connection</li>
+<li>Collects RAM and Swap usage periodically</li>
+<li>Plots memory trends over time</li>
+<li>Runs non-intrusively and exits after 2 minutes</li>
+</ul>
+
+<hr>
+
+<h2>Requirements</h2>
+<pre>
+pip3 install paramiko matplotlib
+Python 3.x recommended
+Target server SSH credentials (username/password)
+</pre>
+
+<hr>
+
+<h2>ssh_mem_monitor.py</h2>
+<pre>
+#!/usr/bin/env python3
+import paramiko
+import time
+import matplotlib.pyplot as plt
+
+HOST = "192.168.209.130"
+USER = "dipesh"
+PASSWORD = "dipesh"
+
+MEM_LOG_INTERVAL = 5   # seconds
+DURATION = 120         # seconds (2 minutes)
+
+timestamps = []
+mem_usage = []
+swap_usage = []
+
+print(f"[+] Connecting to {HOST} via SSH...")
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(HOST, username=USER, password=PASSWORD)
+print("[+] Connected")
+
+start_time = time.time()
+while time.time() - start_time &lt; DURATION:
+    stdin, stdout, stderr = ssh.exec_command("free -m")
+    output = stdout.read().decode()
+    lines = output.splitlines()
+    mem_line = lines[1].split()
+    swap_line = lines[2].split()
+    mem_usage.append(int(mem_line[2]))
+    swap_usage.append(int(swap_line[2]))
+    timestamps.append(time.time() - start_time)
+    time.sleep(MEM_LOG_INTERVAL)
+
+ssh.close()
+print("[+] SSH session closed")
+
+# Plot memory usage
+plt.plot(timestamps, mem_usage, label="RAM Used (MB)")
+plt.plot(timestamps, swap_usage, label="Swap Used (MB)")
+plt.xlabel("Time (seconds)")
+plt.ylabel("Memory Usage (MB)")
+plt.title("Memory Usage via SSH")
+plt.legend()
+plt.grid(True)
+plt.show()
+</pre>
+
+<hr>
+
+<h2>Execution</h2>
+<pre>
+└─# python3 ssh_mem_monitor.py
+[+] Connecting to 192.168.209.130 via SSH...
+[+] Connected
+[+] SSH session closed
+# A matplotlib window pops up showing RAM and Swap usage over 2 minutes
+</pre>
+
+<hr>
+
+<h2>Explanation of Results</h2>
+<ul>
+<li><strong>RAM Used:</strong> Physical memory consumption over time</li>
+<li><strong>Swap Used:</strong> Swap memory consumption over time</li>
+<li>Peaks indicate memory-intensive operations on remote server</li>
+<li>Plot provides visual insight for performance/memory bottlenecks</li>
+</ul>
+
+<hr>
+
+<h2>Solution / Mitigation</h2>
+<ul>
+<li>Monitor memory usage regularly</li>
+<li>Set alerts for high RAM or swap usage</li>
+<li>Investigate processes consuming excessive memory</li>
+<li>Optimize server configuration to prevent memory exhaustion</li>
+</ul>
+
+</body>
+</html>
