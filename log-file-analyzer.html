@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log File Analyzer</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('logs.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+h2 {
+    margin-top: 0;
+}
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>README:</h2>
+Log File Analyzer scans logs for **sensitive information leaks** such as plaintext passwords, API keys, authentication tokens, or secrets.  
+This helps in detecting **data exposure vulnerabilities** in application/server logs.
+</div>
+
+<div class="card">
+<h2>Code:</h2>
+<pre>
+import re
+
+# User input
+log_file = input("Enter log file path: ")
+
+# Patterns
+patterns = [
+    r"password\s*=\s*.+",
+    r"passwd\s*=\s*.+",
+    r"secret\s*=\s*.+",
+    r"apikey\s*=\s*.+",
+    r"token\s*=\s*.+",
+    r"AKIA[0-9A-Z]{16}",        # AWS Access Key ID
+    r"eyJ[a-zA-Z0-9_-]{10,}"    # JWT token
+]
+
+print(f"Scanning log file {log_file}...\n")
+
+with open(log_file, "r", errors="ignore") as f:
+    for num, line in enumerate(f, 1):
+        for pattern in patterns:
+            if re.search(pattern, line, re.IGNORECASE):
+                print(f"[Line {num}] {line.strip()}")
+
+print("\nAnalysis complete.")
+</pre>
+</div>
+
+<div class="card">
+<h2>Execution Example:</h2>
+<pre>
+Enter log file path: /var/log/app.log
+
+[Line 12] password=supersecret
+[Line 45] apikey=ABCD1234XYZ
+[Line 110] eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Analysis complete.
+</pre>
+</div>
+
+</body>
+</html>
