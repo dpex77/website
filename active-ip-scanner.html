@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Active IP Scanner</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>active-ip-scanner.html</h2>
+
+<code>
+import subprocess
+import platform
+from ipaddress import ip_network
+from threading import Thread
+
+# User input
+subnet = input("Enter subnet to scan (e.g., 192.168.209.0/24): ")
+
+# Convert subnet string to network
+network = ip_network(subnet, strict=False)
+
+# Determine ping parameters based on OS
+param = "-n" if platform.system().lower() == "windows" else "-c"
+timeout_param = "-w" if platform.system().lower() == "windows" else "-W"
+
+print(f"Scanning subnet {network}...\n")
+
+# Function to ping a single IP
+def ping(ip):
+    result = subprocess.run(
+        ["ping", param, "1", timeout_param, "1", str(ip)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    if result.returncode == 0:
+        print(f"{ip} is ACTIVE")
+
+# Create and start threads
+threads = []
+for ip in network.hosts():
+    t = Thread(target=ping, args=(ip,))
+    threads.append(t)
+    t.start()
+
+# Wait for all threads to finish
+for t in threads:
+    t.join()
+
+print("\nScan complete.")
+</code>
+
+</div>
+
+<div class="card">
+<h2>Execution Example:</h2>
+<code>
+Enter subnet to scan (e.g., 192.168.209.0/24): 192.168.209.0/24
+Scanning subnet 192.168.209.0/24...
+
+192.168.209.1 is ACTIVE
+192.168.209.2 is ACTIVE
+192.168.209.128 is ACTIVE
+192.168.209.138 is ACTIVE
+192.168.209.140 is ACTIVE
+
+Scan complete.
+</code>
+</div>
+
+</body>
+</html>
