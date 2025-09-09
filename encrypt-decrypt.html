@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>encrypt-decrypt</title>
+  <style>
+    body {
+      background-color: #fff;
+      color: #000;
+      font-family: monospace;
+      text-align: center;
+      white-space: pre-wrap;
+      margin: 20px;
+    }
+    h1 {
+      text-decoration: underline;
+    }
+    .section {
+      margin: 20px 0;
+    }
+    .code {
+      text-align: left;
+      display: inline-block;
+      border: 1px solid black;
+      padding: 10px;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <h1>encrypt-decrypt</h1>
+
+  <div class="section">
+    <h2>Readme</h2>
+    <div class="code"><pre>Read me:
+
+A simple command-line Python tool for encoding/decoding, symmetric encryption/decryption, and hashing (SHA512).
+It uses Python’s built-in hashlib, base64, and the cryptography library.
+Encode (Base64) → Convert text to Base64.
+
+Decode (Base64) → Convert Base64 text back to original.
+
+Encrypt (Symmetric) → Encrypt text using a generated symmetric key (Fernet).
+
+Decrypt (Symmetric) → Decrypt encrypted text (requires the same symmetric key).
+
+Hash (SHA512) → Generate a SHA512 hash (one-way).
+</pre></div>
+  </div>
+
+  <div class="section">
+    <h2>Tool</h2>
+    <div class="code"><pre>import base64
+import hashlib
+from cryptography.fernet import Fernet
+
+
+class CryptoTool:
+    def __init__(self):
+        # Generate a symmetric key (Fernet)
+        self.key = Fernet.generate_key()
+        self.fernet = Fernet(self.key)
+
+    # 1. Encode / Decode
+    def base64_encode(self, text: str) -> str:
+        return base64.b64encode(text.encode()).decode()
+
+    def base64_decode(self, text: str) -> str:
+        return base64.b64decode(text.encode()).decode()
+
+    # 2. Encrypt / Decrypt (Symmetric)
+    def encrypt(self, text: str) -> str:
+        return self.fernet.encrypt(text.encode()).decode()
+
+    def decrypt(self, token: str) -> str:
+        return self.fernet.decrypt(token.encode()).decode()
+
+    # 3. Hashing (SHA512)
+    def hash_sha512(self, text: str) -> str:
+        return hashlib.sha512(text.encode()).hexdigest()
+
+
+def main():
+    tool = CryptoTool()
+    print("Symmetric Key (keep safe if you want to decrypt later):", tool.key.decode())
+    print("\n--- Python Crypto Tool ---")
+
+    while True:
+        print("\nOptions: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit")
+        choice = input("Enter choice (1-6): ").strip()
+
+        if choice == "1":
+            text = input("Enter text to encode: ")
+            print("Encoded:", tool.base64_encode(text))
+
+        elif choice == "2":
+            text = input("Enter Base64 to decode: ")
+            try:
+                print("Decoded:", tool.base64_decode(text))
+            except Exception:
+                print(" Invalid Base64 input.")
+
+        elif choice == "3":
+            text = input("Enter text to encrypt: ")
+            print("Encrypted:", tool.encrypt(text))
+
+        elif choice == "4":
+            token = input("Enter text to decrypt: ")
+            try:
+                print("Decrypted:", tool.decrypt(token))
+            except Exception:
+                print("Invalid or wrong key/token.")
+
+        elif choice == "5":
+            text = input("Enter text to hash: ")
+            print("SHA512 Hash:", tool.hash_sha512(text))
+
+        elif choice == "6":
+            print("Exiting tool. Bye!")
+            break
+
+        else:
+            print("Invalid choice. Try again.")
+
+
+if __name__ == "__main__":
+    main()
+</pre></div>
+  </div>
+
+  <div class="section">
+    <h2>Execution</h2>
+    <div class="code"><pre>Options: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit
+Enter choice (1-6): 5
+Enter text to hash: dipesh
+SHA512 Hash: 408f6f3466bb0f3c734528c7127dd6f2e19ac8da90a08a1cf816737f40e54fd300c2f4f2bbb3a0a14222a29b8879ecec8e60f273ae648292d6340f1f7f410912
+
+Options: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit
+Enter choice (1-6): 1
+Enter text to encode: dipesh
+Encoded: ZGlwZXNo
+
+Options: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit
+Enter choice (1-6): 2
+Enter Base64 to decode: ZGlwZXNo
+Decoded: dipesh
+
+Options: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit
+Enter choice (1-6): 3
+Enter text to encrypt: dipesh
+Encrypted: gAAAAABowCTVnlroLvYm8MIU_Az--7K6zUWtUsQdlTTOVpJRynRKJ0oWSP2CvVvGHKhHHhZ71upOPri41Sk9FRUQlBNrF5Qzew==
+
+Options: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit
+Enter choice (1-6): 4
+Enter text to decrypt: gAAAAABowCTVnlroLvYm8MIU_Az--7K6zUWtUsQdlTTOVpJRynRKJ0oWSP2CvVvGHKhHHhZ71upOPri41Sk9FRUQlBNrF5Qzew==
+Decrypted: dipesh
+
+
+
+Options: 1. Encode (Base64) | 2. Decode (Base64) | 3. Encrypt (Symmetric) | 4. Decrypt (Symmetric) | 5. Hash (SHA512) | 6. Exit
+Enter choice (1-6): 6
+Exiting tool. Bye!
+
+Process finished with exit code 0
+</pre></div>
+  </div>
+</body>
+</html>
