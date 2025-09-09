@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sensitive File Finder</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4 url('lock.jpg') no-repeat top center;
+    background-size: cover;
+    padding: 20px;
+    color: #111;
+}
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+h2 {
+    margin-top: 0;
+}
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>README:</h2>
+Sensitive File Finder scans a directory recursively for files that are likely to contain sensitive information (e.g., <code>config.php</code>, <code>.env</code>, <code>id_rsa</code>, <code>.bak</code> backups).  
+This is useful for identifying **credentials, keys, or misconfigurations** accidentally left on a server or source code repository.
+</div>
+
+<div class="card">
+<h2>Code:</h2>
+<pre>
+import os
+
+# User input
+root_dir = input("Enter directory to scan: ")
+
+# Sensitive filenames/extensions
+sensitive_files = [
+    "config.php", ".env", "settings.py", "db.conf",
+    "id_rsa", "id_dsa", ".htpasswd", "web.config",
+    "passwd", "shadow"
+]
+sensitive_exts = [".bak", ".old", ".zip", ".tar", ".gz"]
+
+print(f"Scanning directory {root_dir}...\n")
+
+for root, dirs, files in os.walk(root_dir):
+    for file in files:
+        if file in sensitive_files or any(file.endswith(ext) for ext in sensitive_exts):
+            print(f"[!] Found sensitive file: {os.path.join(root, file)}")
+
+print("\nScan complete.")
+</pre>
+</div>
+
+<div class="card">
+<h2>Execution Example:</h2>
+<pre>
+Enter directory to scan: /var/www/html
+
+[!] Found sensitive file: /var/www/html/config.php
+[!] Found sensitive file: /var/www/html/.env
+[!] Found sensitive file: /var/www/html/db.conf
+
+Scan complete.
+</pre>
+</div>
+
+</body>
+</html>
