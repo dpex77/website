@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Port Scanner</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+    color: #111;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(11,26,43,0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+code {
+    background-color: #eee;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>port-scanner.html</h2>
+
+<code>
+import socket
+
+# User input
+target = input("Enter target IP or hostname: ")
+start_port = int(input("Enter start port: "))
+end_port = int(input("Enter end port: "))
+
+print(f"Scanning {target} from port {start_port} to {end_port}...\n")
+
+# Scan ports
+for port in range(start_port, end_port + 1):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(0.5)  # short timeout
+    result = sock.connect_ex((target, port))
+    if result == 0:
+        print(f"Port {port} is OPEN")
+    sock.close()
+
+print("\nScan complete.")
+</code>
+
+</div>
+
+<div class="card">
+<h2>Execution Example:</h2>
+<code>
+Enter start port: 1
+Enter end port: 1024
+Scanning 192.168.209.138 from port 1 to 1024...
+
+Port 22 is OPEN
+Port 443 is OPEN
+
+Scan complete.
+</code>
+</div>
+
+</body>
+</html>
