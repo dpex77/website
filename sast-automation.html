@@ -1,52 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAST Semgrep Scan</title>
-<style>
-body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; background: #f4f4f9; color: #222; }
-h1, h2, h3 { color: #222; }
-h1 { text-align: center; }
-pre { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 5px; overflow-x: auto; }
-code { background: #eee; padding: 2px 4px; border-radius: 3px; }
-hr { border: 0; border-top: 1px solid #ccc; margin: 40px 0; }
-#toc { background: #f0f0f0; padding: 20px; border-radius: 8px; }
-#toc ul { list-style-type: none; padding-left: 0; }
-#toc li { margin: 5px 0; }
-</style>
+  <meta charset="UTF-8">
+  <title>SAST Semgrep Lab</title>
+  <style>
+    body {
+      font-family: monospace, monospace;
+      background: #fff;
+      color: #000;
+      margin: 40px;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      text-transform: uppercase;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #000;
+      padding: 10px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: monospace;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .log {
+      background: #eee;
+      border-left: 4px solid #000;
+      padding: 10px;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
 
-<div id="toc">
-<h1>Table of Contents</h1>
-<ul>
-<li><a href="#readme">Readme</a></li>
-<li><a href="#script">Script</a></li>
-<li><a href="#vul-server-example">Vulnerable Server Example</a></li>
-<li><a href="#execution">Execution</a></li>
-</ul>
+<h1>SAST Semgrep Proof-of-Concept Lab</h1>
+
+<div class="section">
+<h2>Readme</h2>
+<p>
+SAST scanning is performed using <strong>Semgrep</strong> to find vulnerabilities in Python code.
+</p>
 </div>
 
-<hr>
-
-<h2 id="readme">Readme</h2>
-<p>SAST scanning is using <strong>Semgrep</strong> here as a tool.</p>
-
-<hr>
-
-<h2 id="script">Script</h2>
-<pre>
-import subprocess
+<div class="section">
+<h2>Script (sastscript.py)</h2>
+<pre><code>import subprocess
 import requests
 import os
 
 # -------------------------
 # CONFIGURATION
 # -------------------------
-TARGET_PATH = "/home/dipesh/SAST"  # Folder containing Python files
-SEMGREP_CONFIG = "p/python"        # Semgrep config
-SEMGRP_JSON = "/tmp/semgrep_results.json"  # Temporary file
+TARGET_PATH = "/home/dipesh/SAST"
+SEMGREP_CONFIG = "p/python"
+SEMGRP_JSON = "/tmp/semgrep_results.json"
 
 # DefectDojo
 DEFECTDOJO_URL = "http://192.168.209.138:8080"
@@ -58,7 +69,7 @@ API_KEY = "XXXXXXXX"  # Replace with your API key
 # -------------------------
 print(f"Running Semgrep scan on {TARGET_PATH}...")
 env = os.environ.copy()
-env["SEMGREP_HOME"] = "/tmp/semgrep"  # Avoid read-only issues
+env["SEMGREP_HOME"] = "/tmp/semgrep"
 
 subprocess.run([
     "/home/dipesh/SAST/env/bin/semgrep",
@@ -83,7 +94,7 @@ files = {
 
 data = {
     'engagement': ENGAGEMENT_ID,
-    'scan_type': 'Semgrep JSON Report',  # Correct scan type in DefectDojo
+    'scan_type': 'Semgrep JSON Report',
     'minimum_severity': 'Low',
     'active': 'true',
     'verified': 'true',
@@ -98,14 +109,12 @@ if response.status_code in [200, 201]:
     print("Scan successfully uploaded to DefectDojo!")
 else:
     print(f"Failed to upload scan. Status: {response.status_code}")
-    print(response.text)
-</pre>
+    print(response.text)</code></pre>
+</div>
 
-<hr>
-
-<h2 id="vul-server-example">Vulnerable Server Example</h2>
-<pre>
-import os
+<div class="section">
+<h2>Vulnerable Server Example (vul_server.py)</h2>
+<pre><code>import os
 import pickle
 import subprocess
 import yaml
@@ -113,7 +122,7 @@ import yaml
 # Hardcoded secret (bad practice)
 API_KEY = "AKIA123456SECRETKEY"
 
-# Command injection vulnerability
+# Command injection
 def run_command(user_input):
     os.system("echo " + user_input)
 
@@ -121,50 +130,32 @@ def run_command(user_input):
 def ping_host(host):
     subprocess.call("ping -c 1 " + host, shell=True)
 
-# Insecure YAML deserialization
+# Unsafe YAML deserialization
 def load_config(data):
-    return yaml.load(data, Loader=yaml.FullLoader)  # unsafe
+    return yaml.load(data, Loader=yaml.FullLoader)
 
-# Insecure pickle deserialization
+# Unsafe pickle deserialization
 def load_pickle(data):
-    return pickle.loads(data)  # unsafe
+    return pickle.loads(data)
 
-# Example usage
 if __name__ == "__main__":
-    run_command("hello; rm -rf /")  # Injection
+    run_command("hello; rm -rf /")
     ping_host("127.0.0.1; rm -rf /")
     config = load_config("!!python/object/apply:os.system ['ls']")
-    print(config)
-</pre>
+    print(config)</code></pre>
+</div>
 
-<hr>
-
-<h2 id="execution">Execution</h2>
-<pre>
-root@test-server:/home/dipesh/SAST# python3 sastscript.py
+<div class="section">
+<h2>Execution</h2>
+<div class="log">
+<pre><code>root@test-server:/home/dipesh/SAST# python3 sastscript.py
 Running Semgrep scan on /home/dipesh/SAST...
 
 ┌──── ○○○ ────┐
 │ Semgrep CLI │
 └─────────────┘
 
-/home/dipesh/SAST/env/lib/python3.12/site-packages/opentelemetry/instrumentation/dependencies.py:4: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  from pkg_resources import (
-
-Scanning 4650 files (only git-tracked) with 151 Code rules:
-
-  CODE RULES
-  Scanning 2107 files with 151 python rules.
-
-  SUPPLY CHAIN RULES
-
-  💎 Sign in with `semgrep login` and run
-     `semgrep ci` to find dependency vulnerabilities and
-     advanced cross-file findings.
-
-  PROGRESS
-
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╸ 100% 0:02:05
+Scanning 4650 files with 151 rules...
 
 ┌──────────────┐
 │ Scan Summary │
@@ -174,20 +165,30 @@ Scanning 4650 files (only git-tracked) with 151 Code rules:
  • Rules run: 151
  • Targets scanned: 2107
  • Parsed lines: ~100.0%
- • Scan skipped:
-   ◦ Files larger than  files 1.0 MB: 3
-   ◦ Files matching .semgrepignore patterns: 179
- • For a detailed list of skipped files and lines, run semgrep with the --verbose flag
-Ran 151 rules on 2107 files: 44 findings.
-💎 Missed out on 637 pro rules since you aren't logged in!
-⚡ Supercharge Semgrep OSS when you create a free account at https://sg.run/rules.
 
-📢 Too many findings? Try Semgrep Pro for more powerful queries and less noise.
-   See https://sg.run/false-positives.
 Semgrep scan completed. Results saved to /tmp/semgrep_results.json
 Uploading results to DefectDojo...
-Scan successfully uploaded to DefectDojo!
-</pre>
+Scan successfully uploaded to DefectDojo!</code></pre>
+</div>
+</div>
+
+<div class="section">
+<h2>Explanation</h2>
+<p>
+The script runs Semgrep on all Python files in the target directory, identifies vulnerabilities such as unsafe <code>subprocess</code> calls, YAML/pickle deserialization issues, and command injection, then uploads the findings to DefectDojo for tracking.
+</p>
+</div>
+
+<div class="section">
+<h2>Mitigation</h2>
+<ul>
+  <li>Validate all inputs to avoid command injection.</li>
+  <li>Avoid using <code>shell=True</code> in subprocess unless necessary.</li>
+  <li>Do not deserialize untrusted YAML or pickle data.</li>
+  <li>Use secure storage for secrets and API keys.</li>
+  <li>Run static analysis tools regularly and integrate into CI/CD.</li>
+</ul>
+</div>
 
 </body>
 </html>
