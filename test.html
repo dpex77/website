@@ -21,12 +21,12 @@
     }
     h2 {
       font-size: 24px;
-      margin-top: 30px;
+      margin-top: 20px;
       margin-bottom: 10px;
     }
     h3 {
       font-size: 20px;
-      margin-top: 20px;
+      margin-top: 15px;
       margin-bottom: 5px;
     }
     p, li {
@@ -47,101 +47,117 @@
     ul {
       margin-top: 5px;
     }
+    .box {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      background: #fafafa;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
+    }
   </style>
 </head>
 <body>
 
-<h1>1. Overview</h1>
-<p>Cross-Site Scripting (XSS) is a vulnerability that allows an attacker to inject malicious scripts into webpages viewed by other users.  
-These scripts can redirect users, steal cookies, install malware, or perform phishing attacks.</p>
+<div class="box">
+  <h1>1. Overview</h1>
+  <p>Cross-Site Scripting (XSS) is a vulnerability that allows an attacker to inject malicious scripts into webpages viewed by other users.  
+  These scripts can redirect users, steal cookies, install malware, or perform phishing attacks.</p>
+</div>
 
-<h2>2. Vulnerability from an Attacker Perspective</h2>
+<div class="box">
+  <h2>2. Vulnerability from an Attacker Perspective</h2>
 
-<h3>What allows it:</h3>
-<p>If your input fields are not sanitized and allow scripts to run. Example: <code>&lt;script&gt;malicious_code()&lt;/script&gt;</code> running in the browser.</p>
+  <h3>What allows it:</h3>
+  <p>If your input fields are not sanitized and allow scripts to run. Example: <code>&lt;script&gt;malicious_code()&lt;/script&gt;</code> running in the browser.</p>
 
-<h3>What to attempt as an attacker:</h3>
+  <h3>What to attempt as an attacker:</h3>
 
-<h4>1. Identify input points in the application</h4>
-<p>Search for places where the website accepts user input:</p>
-<ul>
-  <li>Forms (login, search, comments)</li>
-  <li>URL parameters (<code>?q=search</code>)</li>
-  <li>HTTP headers (User-Agent, Referer)</li>
-  <li>Cookies</li>
-</ul>
+  <h4>1. Identify input points in the application</h4>
+  <p>Search for places where the website accepts user input:</p>
+  <ul>
+    <li>Forms (login, search, comments)</li>
+    <li>URL parameters (<code>?q=search</code>)</li>
+    <li>HTTP headers (User-Agent, Referer)</li>
+    <li>Cookies</li>
+  </ul>
 
-<h4>2. Test with simple payloads</h4>
-<p>Example: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code></p>
-<p>Check if an alert pops up (indicates XSS).</p>
+  <h4>2. Test with simple payloads</h4>
+  <p>Example: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code></p>
+  <p>Check if an alert pops up (indicates XSS).</p>
 
-<h4>3. Test reflected vs stored XSS</h4>
-<ul>
-  <li><strong>Reflected XSS:</strong> Script is immediately executed in response to your request.</li>
-  <li><strong>Stored XSS:</strong> Script is saved on the server (e.g., in a comment) and executed whenever anyone views the page.</li>
-</ul>
+  <h4>3. Test reflected vs stored XSS</h4>
+  <ul>
+    <li><strong>Reflected XSS:</strong> Script is immediately executed in response to your request.</li>
+    <li><strong>Stored XSS:</strong> Script is saved on the server (e.g., in a comment) and executed whenever anyone views the page.</li>
+  </ul>
 
-<h4>4. Bypass input filters</h4>
-<p>Try variations of <code>&lt;script&gt;</code> like:</p>
-<ul>
-  <li><code>&lt;img src=x onerror=alert(1)&gt;</code></li>
-  <li><code>'"&gt;&lt;svg/onload=alert(1)&gt;</code></li>
-</ul>
+  <h4>4. Bypass input filters</h4>
+  <p>Try variations of <code>&lt;script&gt;</code> like:</p>
+  <ul>
+    <li><code>&lt;img src=x onerror=alert(1)&gt;</code></li>
+    <li><code>'"&gt;&lt;svg/onload=alert(1)&gt;</code></li>
+  </ul>
 
-<h4>5. Escalate impact</h4>
-<ul>
-  <li>Steal cookies: <code>document.cookie</code></li>
-  <li>Redirect users: <code>window.location='http://malicious.site'</code></li>
-  <li>Execute complex JavaScript for phishing or keylogging</li>
-</ul>
+  <h4>5. Escalate impact</h4>
+  <ul>
+    <li>Steal cookies: <code>document.cookie</code></li>
+    <li>Redirect users: <code>window.location='http://malicious.site'</code></li>
+    <li>Execute complex JavaScript for phishing or keylogging</li>
+  </ul>
 
-<h3>Types:</h3>
+  <h3>Types:</h3>
 
-<h4>Reflected XSS:</h4>
-<p>Script output reflects to user. Not stored on the server. Triggered when the user clicks on a malicious link.</p>
-<p>Steps:</p>
-<ol>
-  <li>The attacker crafts a malicious link (usually with a script payload in a query string or form).</li>
-  <li>The script gets reflected in the server's response without being stored.</li>
-  <li>The attacker sends this link to a victim (via email, social media, phishing, etc.).</li>
-  <li>When the victim clicks the link, the script runs in their browser, not the attacker’s.</li>
-</ol>
-<p><em>User interaction is required!</em></p>
+  <h4>Reflected XSS:</h4>
+  <p>Script output reflects to user. Not stored on the server. Triggered when the user clicks on a malicious link.</p>
+  <p>Steps:</p>
+  <ol>
+    <li>The attacker crafts a malicious link (usually with a script payload in a query string or form).</li>
+    <li>The script gets reflected in the server's response without being stored.</li>
+    <li>The attacker sends this link to a victim (via email, social media, phishing, etc.).</li>
+    <li>When the victim clicks the link, the script runs in their browser, not the attacker’s.</li>
+  </ol>
+  <p><em>User interaction is required!</em></p>
 
-<h4>Stored XSS:</h4>
-<p>Stored within the server.</p>
-<p>How to get it stored as an attacker?</p>
-<ul>
-  <li>Target comment boxes, profile/bio fields, chat messages, forum posts</li>
-</ul>
-<pre>&lt;script&gt;alert('Hacked!')&lt;/script&gt;</pre>
-<p>If the application saves and displays the comment without sanitization, any user who reads the blog post will trigger the script.</p>
-<p>This is dangerous because <strong>no interaction is required from the attacker</strong> after the payload is stored.</p>
+  <h4>Stored XSS:</h4>
+  <p>Stored within the server.</p>
+  <p>How to get it stored as an attacker?</p>
+  <ul>
+    <li>Target comment boxes, profile/bio fields, chat messages, forum posts</li>
+  </ul>
+  <pre>&lt;script&gt;alert('Hacked!')&lt;/script&gt;</pre>
+  <p>If the application saves and displays the comment without sanitization, any user who reads the blog post will trigger the script.</p>
+  <p>This is dangerous because <strong>no interaction is required from the attacker</strong> after the payload is stored.</p>
 
-<h4>DOM-Based XSS:</h4>
-<ul>
-  <li>Vulnerability exists entirely in client-side JavaScript.</li>
-  <li>Example:</li>
-  <pre>document.getElementById('output').textContent = location.hash;</pre>
-  <li>Unsafe example commented: <code>&lt;!-- &lt;script&gt;alert('XSS')&lt;/script&gt; --&gt;</code></li>
-  <li>Triggered purely by unsafe DOM manipulation.</li>
-</ul>
+  <h4>DOM-Based XSS:</h4>
+  <ul>
+    <li>Vulnerability exists entirely in client-side JavaScript.</li>
+    <li>Example:</li>
+    <pre>document.getElementById('output').textContent = location.hash;</pre>
+    <li>Unsafe example commented: <code>&lt;!-- &lt;script&gt;alert('XSS')&lt;/script&gt; --&gt;</code></li>
+    <li>Triggered purely by unsafe DOM manipulation.</li>
+  </ul>
+</div>
 
-<h2>3. Vulnerability from a Defender Perspective</h2>
+<div class="box">
+  <h2>3. Vulnerability from a Defender Perspective</h2>
 
-<h4>Prevention:</h4>
-<ul>
-  <li><strong>Content Security Policy (CSP):</strong> Helps limit what scripts can run on your page. Use <code>HttpOnly</code> on HTTP response to prevent JavaScript from accessing cookies.</li>
-  <li><strong>Input validation:</strong> Reject dangerous inputs (e.g., <code>&lt;</code>, <code>&gt;</code>, script tags).</li>
-  <li><strong>Output encoding:</strong> Encode data before displaying in HTML, JavaScript, or URLs.</li>
-</ul>
+  <h4>Prevention:</h4>
+  <ul>
+    <li><strong>Content Security Policy (CSP):</strong> Helps limit what scripts can run on your page. Use <code>HttpOnly</code> on HTTP response to prevent JavaScript from accessing cookies.</li>
+    <li><strong>Input validation:</strong> Reject dangerous inputs (e.g., <code>&lt;</code>, <code>&gt;</code>, script tags).</li>
+    <li><strong>Output encoding:</strong> Encode data before displaying in HTML, JavaScript, or URLs.</li>
+  </ul>
+</div>
 
-<h2>4. Extras</h2>
-<ul>
-  <li>XSS attacks rely on the victim executing attacker-supplied scripts.</li>
-  <li>Stored XSS is more dangerous than reflected XSS due to persistence.</li>
-  <li>DOM-based XSS can occur without server-side vulnerabilities, purely via unsafe client-side code.</li>
-</ul>
+<div class="box">
+  <h2>4. Extras</h2>
+  <ul>
+    <li>XSS attacks rely on the victim executing attacker-supplied scripts.</li>
+    <li>Stored XSS is more dangerous than reflected XSS due to persistence.</li>
+    <li>DOM-based XSS can occur without server-side vulnerabilities, purely via unsafe client-side code.</li>
+  </ul>
+</div>
 
 </body>
 </html>
