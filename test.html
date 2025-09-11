@@ -3,161 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XSS Vulnerability Notes</title>
+  <title>Security Overview</title>
   <style>
     body {
       font-family: monospace, monospace;
-      background: #fff;
+      background: linear-gradient(135deg, #fff 50%, #000 50%);
       color: #000;
       margin: 40px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
-    h1, h2, h3 {
-      font-family: monospace, monospace;
-    }
+
     h1 {
+      text-align: center;
+      margin-bottom: 40px;
       font-size: 28px;
-      margin-bottom: 10px;
+      background: #000;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
     }
-    h2 {
-      font-size: 24px;
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .card {
+      flex: 1;
+      background: #fff;
+      border: 2px solid #000;
+      padding: 20px;
+      border-radius: 8px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: 16px;
       margin-top: 20px;
       margin-bottom: 10px;
+      font-weight: bold;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 4px;
     }
-    h3 {
-      font-size: 20px;
-      margin-top: 15px;
-      margin-bottom: 5px;
-    }
-    p, li {
-      font-size: 16px;
-    }
-    code {
-      background-color: #f4f4f4;
-      padding: 2px 4px;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-    pre {
-      background-color: #f4f4f4;
-      padding: 10px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
+
     ul {
-      margin-top: 5px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
-    .box {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-      background: #fafafa;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
+
+    li {
+      margin: 6px 0;
+      padding: 6px 8px;
+      border-left: 4px solid #000;
+      background: #f8f8f8;
+    }
+
+    a {
+      text-decoration: none;
+      color: #000;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+  <h1>Security Overview</h1>
+  <div class="container">
 
-<div class="box">
-  <h1>1. Overview</h1>
-  <p>Cross-Site Scripting (XSS) is a vulnerability that allows an attacker to inject malicious scripts into webpages viewed by other users.  
-  These scripts can redirect users, steal cookies, install malware, or perform phishing attacks.</p>
-</div>
+    <!-- Card 1: Vulnerabilities -->
+    <div class="card">
+      <h2>Software/Network Vulnerabilities</h2>
+      <div class="section-title">1. Injection-related Vulnerabilities</div>
+      <ul>
+        <li><a href="code-injection.html">Code Injection</a></li>
+        <li><a href="command-injection.html">Command Injection</a></li>
+        <li><a href="sql-injection.html">SQL Injection</a></li>
+        <li><a href="format-string.html">Format String Vulnerability</a></li>
+        <li><a href="http-header-injection.html">HTTP Header Injection</a></li>
+        <li><a href="log-injection.html">Log Injection Attacks</a></li>
+        <li><a href="file-upload.html">Unrestricted File Upload</a></li>
+      </ul>
 
-<div class="box">
-  <h2>2. Vulnerability from an Attacker Perspective</h2>
+      <div class="section-title">2. Denial of Service (DoS)</div>
+      <ul>
+        <li><a href="syn-flood.html">SYN Flood</a></li>
+        <li><a href="http-flood.html">HTTP Flood</a></li>
+        <li><a href="resource-exhaustion.html">Resource Exhaustion</a></li>
+      </ul>
 
-  <h3>What allows it:</h3>
-  <p>If your input fields are not sanitized and allow scripts to run. Example: <code>&lt;script&gt;malicious_code()&lt;/script&gt;</code> running in the browser.</p>
+      <div class="section-title">3. Web Security Vulnerabilities</div>
+      <ul>
+        <li><a href="csrf.html">Cross-Site Request Forgery (CSRF)</a></li>
+        <li><a href="xss.html">Cross-Site Scripting (XSS)</a></li>
+        <li><a href="ssrf.html">Server-Side Request Forgery (SSRF)</a></li>
+        <li><a href="clickjacking.html">Clickjacking</a></li>
+        <li><a href="cors.html">CORS Misconfiguration</a></li>
+      </ul>
+    </div>
 
-  <h3>What to attempt as an attacker:</h3>
+    <!-- Card 2: Security Engineering -->
+    <div class="card">
+      <h2>Security Engineering</h2>
+      <ul>
+        <li><a href="mem-bruteforce.html">Memory Exhaustion Bruteforce</a></li>
+        <li><a href="cpu-bruteforce.html">CPU Exhaustion Bruteforce</a></li>
+        <li><a href="vuln-scanner.html">Web Vulnerability Scanner</a></li>
+        <li><a href="0-rtt.html">TLS1.3 0-RTT Scanner</a></li>
+        <li><a href="encrypt-decrypt.html">Encryption/Hashing Tool</a></li>
+        <li><a href="dast-defectdojo.html">DAST Automation (DefectDojo)</a></li>
+        <li><a href="sast-automation.html">SAST Automation</a></li>
+        <li><a href="sca-automation.html">SCA Automation</a></li>
+        <li><a href="ssh-plot.html">SSH Data Plotter</a></li>
+        <li><a href="ssh-bruteforce.html">SSH/HTTPS/API Bruteforce</a></li>
+        <li><a href="pdf-scraper.html">PDF Scraper</a></li>
+        <li><a href="port-scanner.html">Port Scanner</a></li>
+        <li><a href="active-ip-scanner.html">Active IP Scanner</a></li>
+        <li><a href="log-file-analyzer.html">Log File Analyzer</a></li>
+        <li><a href="sensitive-file-finder.html">Sensitive File Finder</a></li>
+      </ul>
+    </div>
 
-  <h4>1. Identify input points in the application</h4>
-  <p>Search for places where the website accepts user input:</p>
-  <ul>
-    <li>Forms (login, search, comments)</li>
-    <li>URL parameters (<code>?q=search</code>)</li>
-    <li>HTTP headers (User-Agent, Referer)</li>
-    <li>Cookies</li>
-  </ul>
+    <!-- Card 3: Self -->
+    <div class="card">
+      <h2>Self</h2>
+      <p>Systems packet-level dissection to application-level code.</p>
+      <p>MS in Cybersecurity.</p>
 
-  <h4>2. Test with simple payloads</h4>
-  <p>Example: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code></p>
-  <p>Check if an alert pops up (indicates XSS).</p>
+      <h3>Certifications</h3>
+      <ul>
+        <li><a href="https://www.credly.com/earner/earned/badge/008292d9-421f-4227-9790-e4ad35e62459" target="_blank">CISSP</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/55a72f1a-ac78-4785-a074-47c6cde5f32a" target="_blank">CCSP</a></li>
+        <li><a href="https://www.credly.com/badges/fde9121b-c42e-48c9-80b2-a41ccc260b8b" target="_blank">CISA</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/482fa9c4-a48a-4ece-a38c-9bcd54708e8c" target="_blank">AWS Security</a></li>
+        <li><a href="https://rhtapps.redhat.com/verify?certId=130-078-413" target="_blank">RHCE</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/444dbdb2-1435-4210-bd41-7c78c5635bc8" target="_blank">CCNP</a></li>
+        <li>ITIL</li>
+      </ul>
 
-  <h4>3. Test reflected vs stored XSS</h4>
-  <ul>
-    <li><strong>Reflected XSS:</strong> Script is immediately executed in response to your request.</li>
-    <li><strong>Stored XSS:</strong> Script is saved on the server (e.g., in a comment) and executed whenever anyone views the page.</li>
-  </ul>
+      <h3>Languages</h3>
+      <p>Bash, Python, Go</p>
+    </div>
 
-  <h4>4. Bypass input filters</h4>
-  <p>Try variations of <code>&lt;script&gt;</code> like:</p>
-  <ul>
-    <li><code>&lt;img src=x onerror=alert(1)&gt;</code></li>
-    <li><code>'"&gt;&lt;svg/onload=alert(1)&gt;</code></li>
-  </ul>
-
-  <h4>5. Escalate impact</h4>
-  <ul>
-    <li>Steal cookies: <code>document.cookie</code></li>
-    <li>Redirect users: <code>window.location='http://malicious.site'</code></li>
-    <li>Execute complex JavaScript for phishing or keylogging</li>
-  </ul>
-
-  <h3>Types:</h3>
-
-  <h4>Reflected XSS:</h4>
-  <p>Script output reflects to user. Not stored on the server. Triggered when the user clicks on a malicious link.</p>
-  <p>Steps:</p>
-  <ol>
-    <li>The attacker crafts a malicious link (usually with a script payload in a query string or form).</li>
-    <li>The script gets reflected in the server's response without being stored.</li>
-    <li>The attacker sends this link to a victim (via email, social media, phishing, etc.).</li>
-    <li>When the victim clicks the link, the script runs in their browser, not the attacker’s.</li>
-  </ol>
-  <p><em>User interaction is required!</em></p>
-
-  <h4>Stored XSS:</h4>
-  <p>Stored within the server.</p>
-  <p>How to get it stored as an attacker?</p>
-  <ul>
-    <li>Target comment boxes, profile/bio fields, chat messages, forum posts</li>
-  </ul>
-  <pre>&lt;script&gt;alert('Hacked!')&lt;/script&gt;</pre>
-  <p>If the application saves and displays the comment without sanitization, any user who reads the blog post will trigger the script.</p>
-  <p>This is dangerous because <strong>no interaction is required from the attacker</strong> after the payload is stored.</p>
-
-  <h4>DOM-Based XSS:</h4>
-  <ul>
-    <li>Vulnerability exists entirely in client-side JavaScript.</li>
-    <li>Example:</li>
-    <pre>document.getElementById('output').textContent = location.hash;</pre>
-    <li>Unsafe example commented: <code>&lt;!-- &lt;script&gt;alert('XSS')&lt;/script&gt; --&gt;</code></li>
-    <li>Triggered purely by unsafe DOM manipulation.</li>
-  </ul>
-</div>
-
-<div class="box">
-  <h2>3. Vulnerability from a Defender Perspective</h2>
-
-  <h4>Prevention:</h4>
-  <ul>
-    <li><strong>Content Security Policy (CSP):</strong> Helps limit what scripts can run on your page. Use <code>HttpOnly</code> on HTTP response to prevent JavaScript from accessing cookies.</li>
-    <li><strong>Input validation:</strong> Reject dangerous inputs (e.g., <code>&lt;</code>, <code>&gt;</code>, script tags).</li>
-    <li><strong>Output encoding:</strong> Encode data before displaying in HTML, JavaScript, or URLs.</li>
-  </ul>
-</div>
-
-<div class="box">
-  <h2>4. Extras</h2>
-  <ul>
-    <li>XSS attacks rely on the victim executing attacker-supplied scripts.</li>
-    <li>Stored XSS is more dangerous than reflected XSS due to persistence.</li>
-    <li>DOM-based XSS can occur without server-side vulnerabilities, purely via unsafe client-side code.</li>
-  </ul>
-</div>
-
+  </div>
 </body>
 </html>
