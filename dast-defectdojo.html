@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAST Readme</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #444;
+    }
+
+    pre {
+      background: #222;
+      color: #eee;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Readme</h1>
+
+  <pre>
+import subprocess
+import requests
+import json
+import os
+
+# -------------------
+# Config
+# -------------------
+TARGET = "https://192.168.209.138"
+OUTPUT_FILE = "nikto_scan.json"
+DEFECTDOJO_URL = "http://192.168.209.138:8080/api/v2/"
+API_KEY = "9fef9e2c496ec0823bb14402e60f49dfa5487637"
+ENGAGEMENT_ID = 1
+SCAN_TYPE = "Nikto Scan"
+
+# -------------------
+# Run Nikto
+# -------------------
+def run_nikto():
+    print(f"[*] Running Nikto scan on {TARGET}...")
+    cmd = [
+        "nikto",
+        "-h", TARGET,
+        "-ssl",
+        "-Format", "json",
+        "-o", OUTPUT_FILE
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"[!] Nikto exited with code {result.returncode} (likely findings, not failure).")
+        if result.stderr:
+            print(f"[!] STDERR: {result.stderr.strip()}")
+
+    print(f"[*] Nikto scan finished. Raw output saved to {OUTPUT_FILE}")
+
+
+# -------------------
+# Clean Nikto JSON
+# -------------------
+def clean_nikto_output():
+    """Extract JSON part from Nikto output file"""
+    with open(OUTPUT_FILE, "r") as f:
+        lines = f.readlines()
+
+    json_start = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("{"):
+            json_start = i
+            break
+
+    if json_start is None:
+        raise ValueError("No JSON object found in Nikto output")
+
+    json_str = "".join(lines[json_start:])
+    data = json.loads(json_str)
+
+    cleaned_file = "nikto_clean.json"
+    with open(cleaned_file, "w") as f:
+        json.dump(data, f, indent=2)
+
+    print(f"[*] Cleaned Nikto JSON saved to {cleaned_file}")
+    return cleaned_file
+
+
+# -------------------
+# Upload to DefectDojo
+# -------------------
+def upload_to_defectdojo(file_path):
+    url = DEFECTDOJO_URL + "import-scan/"
+    headers = {"Authorization": f"Token {API_KEY}"}
+    files = {"file": open(file_path, "rb")}
+    data = {
+        "engagement": ENGAGEMENT_ID,
+        "scan_type": SCAN_TYPE,
+        "active": True,
+        "verified": True,
+        "close_old_findings": False,
+    }
+
+    print(f"[*] Uploading report {file_path} to DefectDojo Engagement {ENGAGEMENT_ID}...")
+    response = requests.post(url, headers=headers, files=files, data=data, verify=False)
+
+    if response.status_code == 201:
+        print("[+] Report uploaded successfully!")
+    else:
+        print(f"[-] Failed to upload report. HTTP {response.status_code}")
+        print(f"[-] Response: {response.text}")
+
+
+# -------------------
+# Main
+# -------------------
+def main():
+    run_nikto()
+    cleaned_file = clean_nikto_output()
+    upload_to_defectdojo(cleaned_file)
+
+
+if __name__ == "__main__":
+    main()
+  </pre>
+
+  <h2>Vulnerable Server</h2>
+  <pre>
+from flask import Flask, make_response
+import ssl
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    # No security headers, obvious banner
+    resp = make_response("""
+        &lt;h1&gt;Welcome to VulnerableApp&lt;/h1&gt;
+        &lt;p&gt;Test app for Nikto scanning&lt;/p&gt;
+        &lt;a href='/phpinfo.php'&gt;phpinfo()&lt;/a&gt;
+    """)
+    resp.headers["Server"] = "Apache/2.2.8 (Ubuntu)"   # old Apache version
+    resp.headers["X-Powered-By"] = "PHP/5.2.4"         # old PHP version
+    return resp
+
+@app.route("/phpinfo.php")
+def phpinfo():
+    return "&lt;h1&gt;PHP Version 5.2.4&lt;/h1&gt;&lt;p&gt;Configuration info...&lt;/p&gt;"
+
+@app.route("/test")
+def test():
+    return "Test page with no security headers"
+
+if __name__ == "__main__":
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain("cert.pem", "key.pem")
+    app.run(host="0.0.0.0", port=443, ssl_context=context, debug=False)
+  </pre>
+
+  <h2>Execution</h2>
+  <pre>
+python3 dast.py
+[*] Running Nikto scan on https://192.168.209.138...
+[!] Nikto exited with code 1 (likely findings, not failure).
+[*] Nikto scan finished. Raw output saved to nikto_scan.json
+[*] Cleaned Nikto JSON saved to nikto_clean.json
+[*] Uploading report nikto_clean.json to DefectDojo Engagement 1...
+[+] Report uploaded successfully!
+  </pre>
+</body>
+</html>
