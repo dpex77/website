@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SCA Dependency-Check Lab</title>
+  <style>
+    body {
+      font-family: monospace, monospace;
+      background: #fff;
+      color: #000;
+      margin: 40px;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      text-transform: uppercase;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #000;
+      padding: 10px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: monospace;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .log {
+      background: #eee;
+      border-left: 4px solid #000;
+      padding: 10px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>SCA Dependency-Check Proof-of-Concept Lab</h1>
+
+<div class="section">
+<h2>Readme</h2>
+<p>
+Software Composition Analysis (SCA) identifies known vulnerabilities in third-party dependencies.  
+This lab uses <strong>OWASP Dependency-Check</strong> to scan a vulnerable Python project and upload results into <strong>DefectDojo</strong>.
+</p>
+</div>
+
+<div class="section">
+<h2>Script (sca.py)</h2>
+<pre><code>import subprocess
+import requests
+import datetime
+import os
+
+# -----------------------------
+# CONFIGURATION
+# -----------------------------
+PROJECT_DIR = "/home/dipesh/SCA/vuln-python-app"
+OUTPUT_FILE = "dependency-check-report.xml"
+REPORT_DIR = "./reports"
+DEPENDENCY_CHECK = "/home/dipesh/SCA/dependency-check/bin/dependency-check.sh"
+
+# DefectDojo
+DEFECTDOJO_URL = "http://192.168.209.138:8080"
+ENGAGEMENT_ID = 2
+API_KEY = "XXX"
+
+# -----------------------------
+# Ensure report directory exists
+# -----------------------------
+if not os.path.isdir(REPORT_DIR):
+    os.makedirs(REPORT_DIR)
+
+XML_REPORT_PATH = os.path.join(REPORT_DIR, OUTPUT_FILE)
+
+# -----------------------------
+# Step 1: Run Dependency-Check scan
+# -----------------------------
+print(f"[*] Running Dependency-Check scan on {PROJECT_DIR}...")
+
+try:
+    subprocess.run(
+        [
+            DEPENDENCY_CHECK,
+            "--project", "VulnPythonApp",
+            "--scan", PROJECT_DIR,
+            "--format", "XML",
+            "--out", REPORT_DIR
+        ],
+        check=True
+    )
+    print("[*] Dependency-Check scan completed.")
+except subprocess.CalledProcessError as e:
+    print(f"[-] Dependency-Check scan failed: {e}")
+    exit(1)
+
+if not os.path.exists(XML_REPORT_PATH):
+    print(f"[-] XML report {XML_REPORT_PATH} not found. Upload skipped.")
+    exit(1)
+
+# -----------------------------
+# Step 2: Upload report to DefectDojo
+# -----------------------------
+print(f"[*] Uploading report {XML_REPORT_PATH} to DefectDojo Engagement {ENGAGEMENT_ID}...")
+
+scan_date = datetime.datetime.now().strftime("%Y-%m-%d")
+headers = {"Authorization": f"Token {API_KEY}"}
+
+data = {
+    "scan_type": "Dependency Check Scan",
+    "engagement": ENGAGEMENT_ID,
+    "scan_date": scan_date,
+    "minimum_severity": "Low",
+    "active": "true",
+    "verified": "true",
+    "tags": "SCA,Dependency-Check"
+}
+
+upload_url = f"{DEFECTDOJO_URL}/api/v2/import-scan/"
+
+with open(XML_REPORT_PATH, "rb") as f:
+    files = {"file": (OUTPUT_FILE, f, "application/xml")}
+    response = requests.post(upload_url, headers=headers, data=data, files=files, verify=False)
+
+# -----------------------------
+# Step 3: Print result
+# -----------------------------
+print(f"[*] HTTP Status Code: {response.status_code}")
+print(f"[*] Response: {response.text}")
+
+if response.status_code in [200, 201]:
+    print("[+] Report uploaded successfully to DefectDojo!")
+else:
+    print("[-] Failed to upload report. Check configuration.")</code></pre>
+</div>
+
+<div class="section">
+<h2>Vulnerable Server Example (app.py + requirements.txt)</h2>
+<pre><code>from flask import Flask
+import requests
+import yaml
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Hello, World! This is a vulnerable demo app."
+
+if __name__ == "__main__":
+    app.run(debug=True)
+</code></pre>
+
+<pre><code># requirements.txt
+Flask==0.12        # CVE-2018-1000656
+requests==2.18.4   # CVE-2018-18074
+Django==1.11.1     # Multiple CVEs
+</code></pre>
+</div>
+
+<div class="section">
+<h2>Execution</h2>
+<div class="log">
+<pre><code>python3 sca.py
+[*] Running Dependency-Check scan on /home/dipesh/SCA/vuln-python-app...
+[INFO] Checking for updates
+[INFO] Skipping the NVD API Update as it was completed within the last 240 minutes
+[INFO] Skipping Known Exploited Vulnerabilities update check since last check was within 24 hours.
+[INFO] Check for updates complete (448 ms)
+
+Dependency-Check is an open source tool performing a best effort analysis of 3rd party dependencies...
+
+[INFO] Analysis Complete (3 seconds)
+[INFO] Writing XML report to: /home/dipesh/SCA/./reports/dependency-check-report.xml
+[*] Dependency-Check scan completed.
+[*] Uploading report ./reports/dependency-check-report.xml to DefectDojo Engagement 2...
+[*] HTTP Status Code: 201
+[*] Response: { ... summary JSON ... }
+[+] Report uploaded successfully to DefectDojo!</code></pre>
+</div>
+</div>
+
+<div class="section">
+<h2>Explanation</h2>
+<p>
+The script automates a <strong>Dependency-Check</strong> run on the vulnerable Python app.  
+It generates an XML report of known CVEs in the installed packages (<code>Flask</code>, <code>requests</code>, <code>Django</code>) and uploads it to DefectDojo.  
+This enables centralized vulnerability tracking and integration into security workflows.
+</p>
+</div>
+
+<div class="section">
+<h2>Mitigation</h2>
+<ul>
+  <li>Regularly update third-party dependencies to patched versions.</li>
+  <li>Pin dependency versions and use tools like <code>pip-audit</code>, <code>Safety</code>, or <code>Dependabot</code> for monitoring.</li>
+  <li>Integrate SCA scans into CI/CD pipelines to catch issues early.</li>
+  <li>Use virtual environments to isolate and track dependencies per project.</li>
+  <li>Periodically rescan projects to detect newly disclosed CVEs affecting older versions.</li>
+</ul>
+</div>
+
+</body>
+</html>
