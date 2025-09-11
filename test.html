@@ -2,63 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Security Overview - Washi Paper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Overview</title>
   <style>
     body {
       font-family: monospace, monospace;
-      background: #f7f7f7;
+      background: #f7f7f7; /* light Zen paper */
       color: #333;
       margin: 40px;
       line-height: 1.6;
     }
+
     h1 {
       text-align: center;
       margin-bottom: 40px;
       font-size: 28px;
-      background: #666;
+      background: #666; /* soft gray */
       color: #fff;
       padding: 10px;
       border-radius: 8px;
     }
-    .container { display: flex; gap: 20px; }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
     .card {
       flex: 1;
       background: #fff;
       border: 2px solid #666;
       padding: 20px;
       border-radius: 8px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
-    .card h2 { border-bottom: 2px solid #666; }
-    li { background: #ededed; border-left: 4px solid #666; margin: 6px 0; padding: 6px; }
-    a { color: #333; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+      border-bottom: 2px solid #666;
+      padding-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      border-bottom: 1px dashed #666;
+      padding-bottom: 4px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      margin: 6px 0;
+      padding: 6px 8px;
+      border-left: 4px solid #666;
+      background: #ededed;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <h1>Security Overview</h1>
   <div class="container">
+
+    <!-- Card 1: Vulnerabilities -->
     <div class="card">
       <h2>Software/Network Vulnerabilities</h2>
+      <div class="section-title">1. Injection-related Vulnerabilities</div>
       <ul>
         <li><a href="code-injection.html">Code Injection</a></li>
+        <li><a href="command-injection.html">Command Injection</a></li>
         <li><a href="sql-injection.html">SQL Injection</a></li>
+        <li><a href="format-string.html">Format String Vulnerability</a></li>
+        <li><a href="http-header-injection.html">HTTP Header Injection</a></li>
+        <li><a href="log-injection.html">Log Injection Attacks</a></li>
+        <li><a href="file-upload.html">Unrestricted File Upload</a></li>
+      </ul>
+
+      <div class="section-title">2. Denial of Service (DoS)</div>
+      <ul>
+        <li><a href="syn-flood.html">SYN Flood</a></li>
+        <li><a href="http-flood.html">HTTP Flood</a></li>
+        <li><a href="resource-exhaustion.html">Resource Exhaustion</a></li>
+      </ul>
+
+      <div class="section-title">3. Web Security Vulnerabilities</div>
+      <ul>
+        <li><a href="csrf.html">Cross-Site Request Forgery (CSRF)</a></li>
         <li><a href="xss.html">Cross-Site Scripting (XSS)</a></li>
+        <li><a href="ssrf.html">Server-Side Request Forgery (SSRF)</a></li>
+        <li><a href="clickjacking.html">Clickjacking</a></li>
+        <li><a href="cors.html">CORS Misconfiguration</a></li>
       </ul>
     </div>
+
+    <!-- Card 2: Security Engineering -->
     <div class="card">
       <h2>Security Engineering</h2>
       <ul>
+        <li><a href="mem-bruteforce.html">Memory Exhaustion Bruteforce</a></li>
         <li><a href="cpu-bruteforce.html">CPU Exhaustion Bruteforce</a></li>
+        <li><a href="vuln-scanner.html">Web Vulnerability Scanner</a></li>
+        <li><a href="0-rtt.html">TLS1.3 0-RTT Scanner</a></li>
         <li><a href="encrypt-decrypt.html">Encryption/Hashing Tool</a></li>
+        <li><a href="dast-defectdojo.html">DAST Automation (DefectDojo)</a></li>
+        <li><a href="sast-automation.html">SAST Automation</a></li>
+        <li><a href="sca-automation.html">SCA Automation</a></li>
+        <li><a href="ssh-plot.html">SSH Data Plotter</a></li>
+        <li><a href="ssh-bruteforce.html">SSH/HTTPS/API Bruteforce</a></li>
+        <li><a href="pdf-scraper.html">PDF Scraper</a></li>
+        <li><a href="port-scanner.html">Port Scanner</a></li>
+        <li><a href="active-ip-scanner.html">Active IP Scanner</a></li>
+        <li><a href="log-file-analyzer.html">Log File Analyzer</a></li>
+        <li><a href="sensitive-file-finder.html">Sensitive File Finder</a></li>
       </ul>
     </div>
+
+    <!-- Card 3: Self -->
     <div class="card">
       <h2>Self</h2>
+      <p>Systems packet-level dissection to application-level code.</p>
+      <p>MS in Cybersecurity.</p>
+
+      <h3>Certifications</h3>
       <ul>
-        <li><a href="https://rhtapps.redhat.com/verify?certId=130-078-413" target="_blank">RHCE</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/008292d9-421f-4227-9790-e4ad35e62459" target="_blank">CISSP</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/55a72f1a-ac78-4785-a074-47c6cde5f32a" target="_blank">CCSP</a></li>
         <li><a href="https://www.credly.com/badges/fde9121b-c42e-48c9-80b2-a41ccc260b8b" target="_blank">CISA</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/482fa9c4-a48a-4ece-a38c-9bcd54708e8c" target="_blank">AWS Security</a></li>
+        <li><a href="https://rhtapps.redhat.com/verify?certId=130-078-413" target="_blank">RHCE</a></li>
+        <li><a href="https://www.credly.com/earner/earned/badge/444dbdb2-1435-4210-bd41-7c78c5635bc8" target="_blank">CCNP</a></li>
+        <li>ITIL</li>
       </ul>
+
+      <h3>Languages</h3>
+      <p>Bash, Python, Go</p>
     </div>
+
   </div>
 </body>
 </html>
