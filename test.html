@@ -2,135 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dipesh Parajuli, Security Engineer</title>
+  <title>Security Overview</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      margin: 0;
-      padding: 20px;
+      font-family: monospace, monospace;
+      background: #fff;
+      color: #000;
+      margin: 40px;
+      line-height: 1.5;
     }
-
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #000;
+      display: inline-block;
+      padding: 5px 15px;
     }
-
     .container {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
-
     .card {
-      flex: 1;
-      background: white;
-      border-radius: 12px;
+      border: 1px solid #000;
+      border-radius: 10px;
       padding: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 2px 2px 5px #ccc;
+      background: #fff;
+      max-height: 400px;
       overflow-y: auto;
-      max-height: 90vh;
     }
-
     .card h2 {
       margin-top: 0;
-      font-size: 20px;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 10px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
     }
-
-    p {
-      line-height: 1.6;
+    .section-title {
+      display: block;
+      background: #e74c3c;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .link {
+      display: block;
+      padding: 3px 0;
+      color: #0000ee;
+      text-decoration: none;
+    }
+    .link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>Dipesh Parajuli</h1>
+  <h1>Security Overview</h1>
   <div class="container">
-
-    <!-- Card 1: Professional Summary -->
+    
+    <!-- Software/Network Vulnerabilities -->
     <div class="card">
-      <h2>Professional Summary</h2>
-      <p>
-        Accomplished cybersecurity professional with over a decade of experience in both offensive and defensive security domains, protecting systems, networks, and applications across diverse industries. Hold a Master’s degree in Cybersecurity and globally recognized certifications including CISSP, CSSP, CISA, and AWS Security Specialist, demonstrating advanced technical expertise and specialized security knowledge.
-      </p>
-      <p>
-        Proven expertise in designing and implementing security architectures across all OSI layers—from physical infrastructure to complex application ecosystems. Skilled in security automation, compliance frameworks, system hardening, penetration testing, and the secure software development lifecycle (SSDLC). Known for bridging the gap between engineering and security to build resilient, scalable, and compliant environments.
-      </p>
-      <p>
-        Beyond the professional sphere, I am also a writer and poet by passion, bringing creativity and clarity to complex technical narratives.
-      </p>
+      <h2>Software/Network Vulnerabilities</h2>
+      <span class="section-title">1. Injection-related Vulnerabilities</span>
+      <a href="#" class="link">Code Injection</a>
+      <a href="#" class="link">Command Injection</a>
+      <a href="#" class="link">SQL Injection</a>
+      <a href="#" class="link">LDAP Injection</a>
     </div>
-
-    <!-- Card 2: Security Engineering -->
+    
+    <!-- Security Engineering -->
     <div class="card">
       <h2>Security Engineering</h2>
-      <ul>
-        <li><a href="mem-bruteforce.html"> Bruteforce scripts against an application port to exhaust memory </a></li>
-        <li><a href="cpu-bruteforce.html"> Bruteforce scripts to exhaust cpu </a></li>
-        <li><a href="vuln-scanner.html"> Web Vulnerabilities Scanner </a></li>
-        <li><a href="0-rtt.html">TLS1.3 scanner for 0-RTT</a></li>
-        <li><a href="encrypt-decrypt.html">Encrypt/Decrypt/Hashing tool + </a></li>
-        <li><a href="dast-defectdojo.html">Automating DAST scanning and reporting in Defect Dojo [secured SDLC]</a></li>
-        <li><a href="sast-automation.html">Automating SAST scanning [SAST + Reporting]</a></li>
-        <li><a href="sca-automation.html">Automating SCA scanning [SCA + Reporting]</a></li>
-        <li><a href="nexpose-automation.html">Nexpose Tool Automaton for Vulnerability Scanning </a></li>
-        <li><a href="ssh-plot.html">Login to SSH server and get data and plot</a></li>
-        <li><a href="ssh-bruteforce.html">Integrated Bruteforce logins: ssh/https/API </a></li>
-        <li><a href="pdf-scraper.html">Web Scraping a PDF file </a></li>
-        <li><a href="port-scanner.html">Port scanner tool</a></li>
-        <li><a href="active-ip-scanner.html">IP scanner tool</a></li>
-        <li><a href="log-file-analyzer.html">Log file analyzer tool</a></li>
-        <li><a href="sensitive-file-finder.html">Sensitive file finder tool</a></li>
-        <li><a href="password-generator.html">Password Generator tool</a></li>
-        <li><a href="password-strength.html">Password Strength test tool</a></li>
-      </ul>
+      <a href="#" class="link">Bruteforce scripts against an application port to exhaust memory</a>
+      <a href="#" class="link">Bruteforce scripts to exhaust cpu</a>
+      <a href="#" class="link">Web Vulnerabilities Scanner</a>
     </div>
-
-    <!-- Card 3: Self -->
+    
+    <!-- Self -->
     <div class="card">
       <h2>Self</h2>
       <p>Systems packet level dissection to application level code.</p>
       <p>MS in Cybersecurity.</p>
-      <h3>Certifications: <i>click on each to see the badges</i></h3>
-      <ul>
-        <li>
-          <a href="https://www.credly.com/earner/earned/badge/008292d9-421f-4227-9790-e4ad35e62459" target="_blank">
-            CISSP
-          </a>
-        </li>
-        <li>
-          <a href="https://www.credly.com/earner/earned/badge/55a72f1a-ac78-4785-a074-47c6cde5f32a" target="_blank">
-            CCSP
-          </a>
-        </li>
-        <li>
-          <a href="https://www.credly.com/badges/fde9121b-c42e-48c9-80b2-a41ccc260b8b" target="_blank">
-            CISA
-          </a>
-        </li>
-        <li>
-          <a href="https://www.credly.com/earner/earned/badge/482fa9c4-a48a-4ece-a38c-9bcd54708e8c" target="_blank">
-            AWS Security
-          </a>
-        </li>
-        <li>
-          <a href="https://rhtapps.redhat.com/verify?certId=130-078-413" target="_blank">
-            RHCE
-          </a>
-        </li>
-        <li>
-          <a href="https://www.credly.com/earner/earned/badge/444dbdb2-1435-4210-bd41-7c78c5635bc8" target="_blank">
-            CCNP
-          </a>
-        </li>
-        <li>ITIL</li>
-      </ul>
-      <h3>Languages</h3>
-      <p>Bash, Python, Go</p>
+      <p><strong>Certifications:</strong> <em>click on each to see the badges</em></p>
     </div>
-
   </div>
 </body>
 </html>
