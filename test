@@ -1,1 +1,705 @@
 
+[root@localhost 19]# cat cisco_enable.sh
+#!/bin/bash
+cisco_LOG="/opt/pap/tools/cisco_log.txt"
+
+echo "The log file will be written to $cisco_LOG."
+
+function logMsg () {
+    echo "[${USER}][$(date)] - ${*}" >>"${cisco_LOG}"
+}
+
+echo "Enabling cisco for currently active TCP/UDP ports..."
+logMsg "Enabling cisco for currently active TCP/UDP ports."
+
+# Start ciscod if not running
+logMsg "Checking ciscod state"
+cisco-cmd --state &>/dev/null
+if [ $? -ne 0 ]; then
+    logMsg "ciscod not running — starting service"
+    systemctl start ciscod
+else
+    logMsg "ciscod already running"
+fi
+
+# Allow ICMP (older ciscod compatibility)
+logMsg "Setting ciscod target to ACCEPT for ICMP compatibility"
+cisco-cmd --zone=public --set-target=ACCEPT --permanent
+
+logMsg "Finding static TCP/UDP ports..."
+
+# -----------------------------------------
+# ZERO-AWK PORT EXTRACTION (UNBREAKABLE)
+# -----------------------------------------
+static_ports=""
+while read -r line; do
+    proto=$(echo "$line" | awk '{print $1}')
+    proto=${proto%%:*}
+
+    localaddr=$(echo "$line" | awk '{print $5}')
+    port=${localaddr##*:}
+
+    # Skip localhost
+    case "$localaddr" in
+        127.0.0.1:*|::1:*)
+            logMsg "Skipping localhost port: $localaddr"
+            continue
+        ;;
+    esac
+
+    static_ports+="$port/$proto "
+done < <(ss -tulnp | tail -n +2)
+
+# -----------------------------------------
+# REMOVE DUPLICATES
+# -----------------------------------------
+static_ports=$(printf '%s\n' $static_ports | sort -u)
+
+logMsg "Ports detected for cisco:"
+for p in $static_ports; do
+    logMsg "Detected: $p"
+done
+
+# Detect ppr
+logMsg "Checking for ppr service on ports 1111/1112"
+
+HAS_NM_1111=$(ss -tulnp | grep -q "1111" && ss -tulnp | grep -q "ppr" && echo yes)
+HAS_NM_1112=$(ss -tulnp | grep -q "1112" && ss -tulnp | grep -q "ppr" && echo yes)
+
+HAS_NM="no"
+[ "$HAS_NM_1111" = "yes" ] && HAS_NM="yes"
+[ "$HAS_NM_1112" = "yes" ] && HAS_NM="yes"
+
+MODE_NM="normal"
+SUBNETS=()
+
+# -----------------------------------------
+# MULTI‑SUBNET INPUT + STRICT IPv4 VALIDATION
+# -----------------------------------------
+if [[ "$HAS_NM" == "yes" ]]; then
+    exec > /dev/tty
+    echo "Ports 1111/1112 (ppr) detected."
+    echo -n "Restrict these ports to approved IPs only? (Y/N): "
+    read ans
+
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+        MODE_NM="restricted"
+        logMsg "User selected RESTRICTED mode for ppr ports"
+
+        while true; do
+            echo -n "Enter up to 5 IPv4/CIDR subnets (comma-separated): "
+            read WL_NM
+
+            WL_NM=$(echo "$WL_NM" | tr -d ' ')
+
+            if [[ -z "$WL_NM" ]]; then
+                echo "Error: Input cannot be empty."
+                continue
+            fi
+
+            if [[ "$WL_NM" == *, ]]; then
+                echo "Error: Trailing commas is not allowed."
+                continue
+            fi
+
+            if [[ "$WL_NM" == *,,* ]]; then
+                echo "Error: Double commas are  not allowed."
+                continue
+            fi
+
+            IFS=',' read -r -a SUBNETS <<< "$WL_NM"
+
+            if (( ${#SUBNETS[@]} > 5 )); then
+                echo "Error: Maximum 5 subnets allowed."
+                continue
+            fi
+
+            VALID="yes"
+            for net in "${SUBNETS[@]}"; do
+                if [[ -z "$net" ]]; then
+                    echo "Error: Blank subnet detected."
+                    VALID="no"
+                    break
+                fi
+
+                if ! [[ "$net" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}\/([0-9]|[1-2][0-9]|3[0-2])$ ]]; then
+                    echo "Invalid IPv4/CIDR format: $net"
+                    VALID="no"
+                    break
+                fi
+
+                IFS='/' read ip cidr <<< "$net"
+                IFS='.' read o1 o2 o3 o4 <<< "$ip"
+
+                for oct in $o1 $o2 $o3 $o4; do
+                    if (( oct < 0 || oct > 255 )); then
+                        echo "Invalid IPv4 octet in $net"
+                        VALID="no"
+                        break 2
+                    fi
+                done
+            done
+
+            [[ "$VALID" == "yes" ]] && break
+        done
+
+        logMsg "ppr whitelist subnets: ${SUBNETS[*]}"
+    else
+        MODE_NM="normal"
+        logMsg "User selected NORMAL mode for ppr ports"
+    fi
+
+    exec > /dev/null
+fi
+
+# -----------------------------------------
+# APPLY RULES
+# -----------------------------------------
+logMsg "Applying cisco rules now"
+
+for port_proto in $static_ports; do
+    port="${port_proto%%/*}"
+    proto="${port_proto##*/}"
+
+    if { [ "$port" = "1111" ] && [ "$HAS_NM_1111" = "yes" ]; } ||
+       { [ "$port" = "1112" ] && [ "$HAS_NM_1112" = "yes" ]; }; then
+
+        if [ "$MODE_NM" = "restricted" ]; then
+            logMsg "Applying RESTRICTED rules for ppr port $port"
+
+            for net in "${SUBNETS[@]}"; do
+                logMsg "Allowing $net on port $port/$proto"
+                cisco-cmd --zone=public --permanent \
+                    --add-rich-rule="rule priority='1' family='ipv4' source address='${net}' port protocol='${proto}' port='${port}' accept"
+            done
+
+            logMsg "Adding DROP rule for ppr port $port"
+            cisco-cmd --zone=public --permanent \
+                --add-rich-rule="rule priority='2' family='ipv4' port protocol='${proto}' port='${port}' drop"
+
+        else
+            logMsg "Allowing ppr port normally: $port/$proto"
+            cisco-cmd --zone=public --permanent --add-port=$port_proto
+        fi
+
+        continue
+    fi
+
+    logMsg "Allowing port: $port_proto"
+    cisco-cmd --zone=public --permanent --add-port=$port_proto
+done
+
+logMsg "Reloading ciscod"
+cisco-cmd --reload
+
+logMsg "Enabling ciscod service"
+systemctl enable ciscod
+
+exec > /dev/tty
+echo "cisco successfully enabled on active ports."
+logMsg "cisco successfully enabled on active ports."
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]#
+[root@localhost 19]# cat cisco_disable.sh
+#!/bin/bash
+
+cisco_LOG="/opt/pap/tools/cisco_log.txt"
+
+echo "The log file will be written to $cisco_LOG."
+
+logMesg() {
+    echo "[${USER}] [$(date)] - $*" >> "${cisco_LOG}"
+}
+
+logMesg "+++++++++++++++ FULL cisco WIPEOUT ++++++++++++++++"
+logMesg "Starting full cisco disable + reset."
+
+echo "Stopping ciscod..."
+logMesg "Stopping ciscod..."
+systemctl stop ciscod 2>&1 | tee -a "$cisco_LOG"
+
+echo "Disabling ciscod..."
+logMesg "Disabling ciscod..."
+systemctl disable ciscod 2>&1 | tee -a "$cisco_LOG"
+
+# === Remove all permanent ciscod configs ===
+echo "Removing permanent ciscod configs..."
+logMesg "Removing permanent ciscod configs..."
+
+rm -f /etc/ciscod/zones/*.xml
+rm -f /etc/ciscod/direct.xml
+rm -f /etc/ciscod/richrules.xml
+rm -f /etc/ciscod/ciscod.conf
+
+logMesg "Permanent configs removed."
+
+# === Flush nftables/iptables ===
+echo "Flushing nftables/iptables..."
+logMesg "Flushing nftables/iptables..."
+
+if command -v nft &>/dev/null; then
+    nft flush ruleset 2>&1 | tee -a "$cisco_LOG"
+    logMesg "nftables flushed."
+fi
+
+if command -v iptables &>/dev/null; then
+    iptables -F 2>&1 | tee -a "$cisco_LOG"
+    iptables -X 2>&1 | tee -a "$cisco_LOG"
+    iptables -t nat -F 2>&1 | tee -a "$cisco_LOG"
+    iptables -t nat -X 2>&1 | tee -a "$cisco_LOG"
+    logMesg "iptables flushed."
+fi
+
+# === Verify ===
+ACTIVE=$(systemctl is-active ciscod 2>/dev/null || echo "unknown")
+ENABLED=$(systemctl is-enabled ciscod 2>/dev/null || echo "disabled")
+
+logMesg "ciscod active: $ACTIVE"
+logMesg "ciscod enabled: $ENABLED"
+
+echo "ciscod active: $ACTIVE"
+echo "ciscod enabled: $ENABLED"
+
+logMesg "cisco wipeout completed."
+echo "cisco wipeout completed."
+
+
+
+1. ENABLE SCRIPT – PURPOSE AND IMPLEMENTATION
+------------------------------------------------------------
+Purpose:
+The enable script automatically configures ciscod to allow only the ports currently in use by active services. All other traffic is blocked. It also supports optional IP‑based restrictions for ppr ports (1111/1112). All actions are logged to /opt/pap/tools/cisco_log.txt.
+
+What the script does:
+- Detects all active TCP/UDP listening ports (excluding localhost).
+- Starts ciscod if it is not running.
+- Adds each detected port to the cisco permanently.
+- Detects ppr on ports 1111/1112.
+- If ppr is detected, the user can restrict those ports to specific IPv4/CIDR subnets.
+- Validates subnet input (format, octets, CIDR).
+- Applies rich rules for restricted ports.
+- Sets ciscod default zone to DROP.
+- Reloads and enables ciscod.
+- Logs every action.
+
+How it is implemented (high‑level steps):
+1. Logging initialized.
+2. ciscod state checked; started if needed.
+3. ICMP compatibility mode enabled.
+4. Active ports extracted using ss -tulnp.
+5. Duplicate ports removed.
+6. ppr detection performed.
+7. If ppr is found, user prompted for subnet restrictions.
+8. Subnets validated (IPv4/CIDR).
+9. cisco rules applied:
+   - Normal ports added with --add-port.
+   - Restricted ppr ports use rich rules (allow specific subnets, drop all others).
+10. ciscod reloaded and enabled.
+11. Completion message printed and logged.
+
+------------------------------------------------------------
+2. HOW TO RUN THE ENABLE SCRIPT (EXECUTION STEPS)
+------------------------------------------------------------
+
+Prerequisites:
+- Must be run as root or with sudo.
+- ciscod must be installed.
+
+Execution steps:
+1. Place the script on the system, for example:
+   /opt/pap/tools/cisco_enable.sh
+
+2. Make the script executable:
+   chmod +x /opt/pap/tools/cisco_enable.sh
+
+3. Run the script:
+   sudo /opt/pap/tools/cisco_enable.sh
+
+4. If ppr ports (1111/1112) are detected, the script will prompt:
+   Restrict these ports to approved IPs only? (Y/N)
+
+5. If Y is selected, enter up to 5 IPv4/CIDR subnets separated by commas.
+
+6. Script completes and prints:
+   cisco successfully enabled on active ports.
+
+------------------------------------------------------------
+3. VERIFICATION COMMANDS (YOU WILL FILL OUTPUTS)
+------------------------------------------------------------
+
+Check ciscod status:
+systemctl status ciscod
+
+Check if ciscod is enabled:
+systemctl is-enabled ciscod
+
+List all cisco rules:
+cisco-cmd --list-all
+
+List rich rules:
+cisco-cmd --list-rich-rules
+
+Check active listening ports:
+ss -tulnp
+
+Check cisco logs:
+cat /opt/pap/tools/cisco_log.txt
+
+------------------------------------------------------------
+4. DISABLE SCRIPT – PURPOSE AND IMPLEMENTATION
+------------------------------------------------------------
+
+Purpose:
+The disable script completely removes all ciscod configuration from the system. It stops ciscod, disables it, deletes all configuration files, and flushes nftables and iptables. This is a full cisco wipeout.
+
+What the script does:
+- Stops ciscod.
+- Disables ciscod from starting at boot.
+- Removes all permanent ciscod configuration files.
+- Flushes nftables ruleset (if nft is installed).
+- Flushes iptables filter and nat tables (if iptables is installed).
+- Logs all actions to /opt/pap/tools/cisco_log.txt.
+- Prints final ciscod active/enabled state.
+
+How it is implemented (high‑level steps):
+1. Logging initialized.
+2. ciscod stopped.
+3. ciscod disabled.
+4. All ciscod config files removed:
+   /etc/ciscod/zones/*.xml
+   /etc/ciscod/direct.xml
+   /etc/ciscod/richrules.xml
+   /etc/ciscod/ciscod.conf
+5. nftables flushed if nft exists.
+6. iptables flushed if iptables exists.
+7. ciscod active/enabled state logged and printed.
+8. Completion message printed.
+
+------------------------------------------------------------
+5. HOW TO RUN THE DISABLE SCRIPT (EXECUTION STEPS)
+------------------------------------------------------------
+
+1. Place the script on the system:
+   /opt/pap/tools/cisco_disable.sh
+
+2. Make it executable:
+   chmod +x /opt/pap/tools/cisco_disable.sh
+
+3. Run the script:
+   sudo /opt/pap/tools/cisco_disable.sh
+
+4. Script prints:
+   cisco wipeout completed.
+
+------------------------------------------------------------
+6. DISABLE VERIFICATION COMMANDS
+------------------------------------------------------------
+
+Check ciscod status:
+systemctl status ciscod
+
+Check if ciscod is disabled:
+systemctl is-enabled ciscod
+
+Check nftables rules:
+nft list ruleset
+
+Check iptables rules:
+iptables -L -n
+iptables -t nat -L -n
+
+Check logs:
+cat /opt/pap/tools/cisco_log.txt
+
+
+####
+
+
+SELINUX:
+
+Below is a **clean, Notepad‑friendly, copy‑and‑paste‑ready document** containing full documentation for **both** scripts:
+
+- `selinux_enable.sh`
+- `selinux_disable.sh` (documentation assumes the standard disable script; you can paste your exact script later if needed)
+
+No special formatting, no emojis, no markdown — just plain text.
+
+------------------------------------------------------------
+------------------------------------------------------------
+
+SELINUX ENABLE/DISABLE SCRIPT DOCUMENTATION
+===========================================
+
+1. OVERVIEW
+-----------
+These scripts are used to manage the SELinux operating mode on a Linux system by modifying the persistent configuration file located at:
+
+/etc/selinux/config
+
+The scripts automate:
+- Backing up the existing SELinux configuration
+- Updating SELINUX= and SELINUXTYPE= values
+- Displaying the updated configuration
+- Reminding the user that a system reboot is required for changes to take effect
+
+SELinux modes:
+- enforcing  : SELinux actively enforces policies
+- permissive : SELinux logs policy violations but does not enforce them
+- disabled   : SELinux is completely turned off (requires reboot)
+
+These scripts modify the persistent configuration only. The system must be rebooted for changes to apply.
+
+
+2. SELINUX ENABLE SCRIPT (selinux_enable.sh)
+--------------------------------------------
+Purpose:
+This script enables SELinux in ENFORCING mode and ensures the SELinux policy type is set to "targeted". This is the recommended configuration for most enterprise and security‑focused environments.
+
+What the script does:
+1. Displays warnings and asks for user confirmation.
+2. Verifies that /etc/selinux/config exists.
+3. Creates a timestamped backup of the configuration file.
+4. Sets SELINUX=enforcing.
+5. Sets SELINUXTYPE=targeted.
+6. Displays the updated configuration lines.
+7. Reminds the user that a reboot is required.
+
+Execution:
+1. Make the script executable:
+   chmod +x selinux_enable.sh
+
+2. Run the script:
+   sudo ./selinux_enable.sh
+
+3. Follow the on‑screen prompts.
+
+Verification (commands to fill in later):
+- Check SELinux runtime mode:
+  <command here>
+
+- Check persistent SELinux configuration:
+  <command here>
+
+- Confirm SELinux policy type:
+  <command here>
+
+- Confirm SELinux is enforcing after reboot:
+  <command here>
+
+
+3. SELINUX DISABLE SCRIPT (selinux_disable.sh)
+----------------------------------------------
+Purpose:
+This script disables SELinux by setting SELINUX=disabled in the configuration file. This completely turns off SELinux after the next reboot. This may be required for troubleshooting, legacy applications, or environments where SELinux is not supported.
+
+What the script typically does (based on standard disable scripts):
+1. Displays warnings and asks for user confirmation.
+2. Verifies that /etc/selinux/config exists.
+3. Creates a timestamped backup of the configuration file.
+4. Sets SELINUX=disabled.
+5. Optionally ensures SELINUXTYPE=targeted (not required when disabled, but harmless).
+6. Displays the updated configuration lines.
+7. Reminds the user that a reboot is required.
+
+Execution:
+1. Make the script executable:
+   chmod +x selinux_disable.sh
+
+2. Run the script:
+   sudo ./selinux_disable.sh
+
+3. Follow the on‑screen prompts.
+
+Verification (commands to fill in later):
+- Check SELinux runtime mode:
+  <command here>
+
+- Check persistent SELinux configuration:
+  <command here>
+
+- Confirm SELinux is disabled after reboot:
+  <command here>
+
+
+4. NOTES AND BEST PRACTICES
+---------------------------
+- Always keep the backup file created by the script until the system boots successfully.
+- SELinux changes do not apply immediately; a reboot is mandatory.
+- If the system fails to boot due to SELinux issues, you can:
+  - Boot into permissive mode temporarily via GRUB
+  - Restore the backup configuration file
+- The scripts use sed to update SELinux settings, replacing commented or uncommented lines to ensure consistent behavior across distributions.
+
+
+------------------------------------------------------------
+------------------------------------------------------------
+
+If you want, I can also generate:
+- A combined script that toggles SELinux on/off
+- A troubleshooting section
+- A version formatted for documentation systems like Confluence or SharePoint
+
+#########
+
+Below is a **clean, Notepad‑friendly, copy‑and‑paste‑ready document** for **fapolicyd enable/disable documentation**, matching the style of your SELinux document.  
+No special formatting, no emojis, no markdown — just plain text.
+
+------------------------------------------------------------
+
+
+FAPOLICYD ENABLE/DISABLE SCRIPT AND CONFIGURATION DOCUMENTATION
+===============================================================
+
+#!/bin/bash
+# Enable and configure fapolicyd
+
+echo "[+] Enabling and starting fapolicyd..."
+systemctl enable --now fapolicyd
+
+echo "[+] Updating configuration..."
+sed -i 's/^permissive *=.*/permissive = 0/' /etc/fapolicyd/fapolicyd.conf
+sed -i 's/^enforcing *=.*/enforcing = 0/' /etc/fapolicyd/fapolicyd.conf
+
+echo "[+] Updating policy database..."
+fapolicyd-cli --update
+
+echo "[+] Restarting service..."
+systemctl restart fapolicyd
+
+echo "[✓] fapolicyd enabled and configured."
+
+
+#!/bin/bash
+# Disable fapolicyd safely
+
+echo "[+] Stopping fapolicyd..."
+systemctl stop fapolicyd
+
+echo "[+] Disabling fapolicyd..."
+systemctl disable fapolicyd
+
+echo "[+] Setting permissive mode (optional)..."
+sed -i 's/^permissive *=.*/permissive = 1/' /etc/fapolicyd/fapolicyd.conf
+sed -i 's/^enforcing *=.*/enforcing = 0/' /etc/fapolicyd/fapolicyd.conf
+
+echo "[+] If you want permissive logging only, restart the service:"
+echo "    systemctl restart fapolicyd"
+echo "[✓] fapolicyd disabled."
+
+
+
+1. OVERVIEW
+-----------
+fapolicyd (File Access Policy Daemon) is a userspace application whitelisting framework that controls which files can be executed or accessed based on defined policies. It is commonly used in hardened or compliance‑driven environments.
+
+Before enabling or disabling fapolicyd, the required RPM package must be installed. The daemon must also be enabled and started using systemd.
+
+This document covers:
+- Installation requirements
+- Enabling fapolicyd
+- Disabling fapolicyd
+- Configuration file changes
+- Verification steps (placeholders for commands)
+
+
+2. PREREQUISITES
+----------------
+The fapolicyd package must be installed before enabling the service.
+
+Example:
+  rpm -qa | grep fapolicyd
+  yum install fapolicyd
+  or
+  dnf install fapolicyd
+
+Once installed, the service can be enabled and started.
+
+
+3. ENABLING FAPOLICYD
+---------------------
+Purpose:
+Enabling fapolicyd activates file access control policies on the system. When configured in enforcing mode, it denies file execution or access unless explicitly allowed by policy.
+
+Steps performed:
+1. Ensure the fapolicyd RPM package is installed.
+2. Enable and start the service:
+     systemctl enable --now fapolicyd
+3. Edit the configuration file:
+     vi /etc/fapolicyd/fapolicyd.conf
+4. Set the following values:
+     permissive = 0
+     enforcing = 0   (deny by default)
+5. Update the policy database:
+     fapolicyd-cli --update
+6. Restart the service:
+     systemctl restart fapolicyd
+
+Notes:
+- permissive = 1 allows logging only, no enforcement.
+- enforcing = 1 enforces allow rules; enforcing = 0 denies by default.
+- A deny‑by‑default configuration is the strictest mode and may block applications unless properly whitelisted.
+
+Verification (commands to fill in later):
+- Check service status:
+  <command here>
+
+- Check current mode:
+  <command here>
+
+- Confirm policy database updated:
+  <command here>
+
+- Validate logs for allowed/denied events:
+  <command here>
+
+
+4. DISABLING FAPOLICYD
+----------------------
+Purpose:
+Disabling fapolicyd stops the daemon and prevents it from enforcing file access policies. This may be required for troubleshooting, application compatibility, or environments where file access control is not needed.
+
+Steps performed:
+1. Stop the service:
+     systemctl stop fapolicyd
+2. Disable the service:
+     systemctl disable fapolicyd
+3. Optionally set permissive mode in the config file:
+     vi /etc/fapolicyd/fapolicyd.conf
+     permissive = 1
+     enforcing = 0
+4. Restart the service only if permissive mode is desired:
+     systemctl restart fapolicyd
+   (If fully disabling, do not restart.)
+
+Verification (commands to fill in later):
+- Confirm service is stopped:
+  <command here>
+
+- Confirm service is disabled:
+  <command here>
+
+- Check that no enforcement is occurring:
+  <command here>
+
+
+5. NOTES AND BEST PRACTICES
+---------------------------
+- Always verify that required applications are whitelisted before enabling enforcing mode.
+- A deny‑by‑default configuration can break system functionality if not properly configured.
+- Use permissive mode first to observe what would be denied.
+- Policy updates require running:
+     fapolicyd-cli --update
+- Service changes require:
+     systemctl restart fapolicyd
+- Logs are essential for troubleshooting and tuning policies.
+
+
+
+
